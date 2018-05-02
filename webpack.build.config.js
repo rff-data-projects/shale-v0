@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const scssSharedLoaders = [{ // defining array of css kiaders here to avoid duplication below
+const scssSharedLoaders = [{ // defining array of css loaders here to avoid duplication below
 		loader: MiniCssExtractPlugin.loader,
 	},{
 		loader: 'postcss-loader',
@@ -59,18 +59,13 @@ module.exports = {
 			      test: /\.js$/,
 			      exclude: /node_modules/,
 			      use: ['babel-loader','eslint-loader']
-		    },
-            {
-                test: /\.json$/,
-                use: ['file-loader']
-
-            }
+		    }
      	]
    },
     plugins: [
     	new CleanWebpackPlugin(['dist']),
     	new HtmlWebpackPlugin({
-    		title: 'Output Management',
+    		title: 'Shale Research Clearinghouse',
     		inject: false,
 		    template: './src/index.ejs',
 		}),
