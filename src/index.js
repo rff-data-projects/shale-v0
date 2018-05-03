@@ -1,7 +1,7 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
 import { createBrowseButton, createTopicKey } from './components/BrowseButtons';
-import { createResultItem } from './components/ResultItems'; 
+import { createResultsContainer, createResultItem } from './components/ResultItems'; 
    
 (function(){     
 /* global d3 */
@@ -165,6 +165,7 @@ import { createResultItem } from './components/ResultItems';
                     synthesisItems.push(...matches);
                 });
             }
+            createResultsContainer.call(view);
             view.filterResults(collectionItems);
             view.filterSynthesisResults(synthesisItems);
             /*var promise = new Promise((resolve,reject) => {
@@ -336,8 +337,6 @@ import { createResultItem } from './components/ResultItems';
             console.log('READY!');
             console.log(model.zoteroItems);
             this.renderTopicButtons();
-            this.results = d3.select('#results ul')
-                .classed('load', false);
             console.log(model.collections);
             controller.getCollectionItems(model.collections.find(c => c.data.parentCollection === false).key);
         },
@@ -376,7 +375,7 @@ import { createResultItem } from './components/ResultItems';
             console.log('filterResults', this);
             var filteredData = matches === undefined ? model.zoteroItems : matches; 
 
-            var items = this.results.selectAll('.list-item')
+            var items = d3.select(this.results).selectAll('.list-item')
                 .data(filteredData, d => d.data.key);
 
             // update existing

@@ -1,3 +1,14 @@
+export const createResultsContainer = function(){
+  var html = `<div id="synthesis-results">
+                  <ul class="flex space-between"></ul>
+              </div>
+              <div id="results">
+                  <ul class="load"></ul>
+              </div> `;
+  document.getElementById('results-container').innerHTML = html;
+  this.results = document.querySelector('#results ul');
+};
+
 export const createResultItem = function(d){
     /* global RFFApp */
     var authorStr,
