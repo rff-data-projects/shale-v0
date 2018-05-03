@@ -1,6 +1,6 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
-import { createBrowseButton } from './components/BrowseButtons';
+import { createBrowseButton, createTopicKey } from './components/BrowseButtons';
 import { createResultItem } from './components/ResultItems'; 
    
 (function(){     
@@ -369,6 +369,7 @@ import { createResultItem } from './components/ResultItems';
             showAll     
                 .append('span')
                 .text('Show all');
+            createTopicKey();
         },
         filterResults(matches){
             console.log(matches);

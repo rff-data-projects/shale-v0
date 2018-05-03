@@ -34,19 +34,19 @@ module.exports = {
 	       	{
                 test: /\.scss$/,
                 exclude: /main\.scss/,
-                use: [scssSharedLoaders[0], 
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: true,
-                            localIdentName: '[name]_[local]__[hash:base64:5]',
-                            sourceMap: true,
-                            minimize: true,
-                            importLoaders: 1        
-                        }
-                    },
-                    ...scssSharedLoaders.slice(1)]
-            }, {
+                use: [{
+                    loader: 'style-loader'
+                },{
+                    loader: 'css-loader',
+                    options: {
+                        modules: true,
+                        localIdentName: '[local]',
+                        sourceMap: true
+                    }
+                },
+                ...scssSharedLoaders.slice(1)]
+            },
+            {
                 test: /main\.scss/, // the html refering to classes in main.scss is hard-coded in the index.ejs template
                                     // and therefore these styles should not be renamed bc the html would no longer match
                 use: [scssSharedLoaders[0],

@@ -1,0 +1,76 @@
+@import '../css/variables.scss';
+
+@mixin topicDot() {
+    content: '';
+    display: block;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 10px;
+    height: 10px;
+    border-radius:7px;
+    border: 2px solid #fff;
+    background: $light_blue;
+}
+
+#browse-buttons {
+    display: flex; 
+    flex-wrap: wrap;
+    & .button {
+        width: 132px;
+        height: 53px;
+        margin: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        line-height: 120%;
+        position: relative;
+        span {
+            top: 2px;
+            position: relative;
+        }
+        &.button--tertiary {
+            color: $blue;
+            background: #fff;
+            border: 1px solid $blue;
+        }
+        &.active {
+            background: $blue;
+            color:#fff;
+        }
+    }
+
+}
+
+
+#browse-buttons .button, #topic-key div {
+    
+    &::before {
+        @include topicDot();
+    }
+
+    &.show-all::before {
+        display: none;
+    }
+    
+    &.literature-review::before, &.issue-brief::before {
+        
+        background: $blue;  
+    }
+    
+}
+
+#topic-key {
+    margin-left: 10px;
+    margin-bottom: 1em;
+    div {
+        padding: 0 17px;
+        position: relative;
+
+        &::after, &::before {
+            left: 0;
+            top: calc(50% - 7px) !important;
+        }
+    }
+}
