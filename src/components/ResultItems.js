@@ -1,13 +1,19 @@
+import styles from './results-items.scss';
+console.log(styles);
+/* ******** */
+
 export const createResultsContainer = function(){
-  var html = `<div id="synthesis-results">
+  var html = `<div class="${styles['synthesis-results']}">
                   <ul class="flex space-between"></ul>
               </div>
-              <div id="results">
-                  <ul class="load"></ul>
+              <div class="${styles.results}">
+                  <ul class="${styles.load}"></ul>
               </div> `;
   document.getElementById('results-container').innerHTML = html;
-  this.results = document.querySelector('#results ul');
+  this.results = document.querySelector('div.results ul');
 };
+
+/* ******** */
 
 export const createResultItem = function(d){
     /* global RFFApp */
@@ -70,7 +76,7 @@ export const createResultItem = function(d){
         let textOnly = placeholder.querySelector('.csl-entry').innerHTML;
         let bibContainer = document.createElement('textarea');
         bibContainer.innerHTML = textOnly;
-        bibContainer.setAttribute('class','bib-container');
+        bibContainer.setAttribute('class',styles['bib-container']);
         let link = document.createElement('a');
         link.setAttribute('href', '#');
         link.setAttribute('class','details-link copy-bib');
@@ -83,14 +89,14 @@ export const createResultItem = function(d){
     details = details !== '' ? details : '< nothing to show >';
 
       return `
-              <div class="detail-results-wrapper">
-                  <div class="detail-results">${ details }</div>
+              <div class="${styles['detail-results-wrapper']}">
+                  <div class="${styles['detail-results']}">${ details }</div>
               </div>
-              <div class="summary-results">
+              <div class="${styles['summary-results']}">
                   <div class="flex space-between">
-                      <span class="flex item-info items-center">
+                      <span class="flex ${styles['item-info']} ${styles['items-center']}">
                           <span class="list-item__label">${d.synthesisType || d.data.itemType.undoCamelCase()}</span>
-                          <span class="list-item__meta publisher-name">${publisher.trunc(90,true)}</span>
+                          <span class="list-item__meta ${styles['publisher-name']}">${publisher.trunc(90,true)}</span>
                       </span>
                       <span class="list-item__meta">${d.data.dateString}</span>
                   </div>
@@ -99,3 +105,57 @@ export const createResultItem = function(d){
               </div>
               `;
 }
+
+
+/* ******** */
+
+export const filterResults = function(matches, controller){
+  /* global model, d3 */
+    console.log(controller);
+    console.log('filterResults', this);
+    var filteredData = matches === undefined ? model.zoteroItems : matches; 
+
+    var items = d3.select(this.results).selectAll(styles['list-item'])
+        .data(filteredData, d => d.data.key);
+
+    // update existing
+  /*  items
+        .classed('entered',false)
+        .classed('remained', true);
+*/
+    // transition and remove exiting
+    items.exit()
+        .classed(styles.entered,false)
+        .classed(styles.exiting, true)
+        .transition(1500).remove();
+
+    var entering = items.enter()
+        .append('li')
+        .attr('class', (d,i) => d.key + ' ' + d.data.itemType + ' index-' + i + ( d.data.institution === 'RFF' || d.data.institution === 'Resources for the Future' ? ' RFF' : ''))
+        .classed('entering', true)
+        .classed('list-item', true)
+        .html(d => createResultItem(d))
+        .on('click', (d,i,nodes) => {
+            if ( !d3.event.target.classList.contains('details-link') ){ // prevents links in the details section from triggering
+                                                                        // this event. stopPropagation() was not working as expected
+                this.showDetails(nodes[i]);
+            }
+        });
+
+    setTimeout(function(){
+        entering.classed('entering',false);   
+    });
+
+    this.items = entering.merge(items); 
+    d3.selectAll('.item-title-link')
+        .on('click', function(){
+            console.log('click');
+            console.log(d3.event);
+            d3.event.preventDefault();     
+        });
+    d3.selectAll('.copy-bib')
+        .on('click', function(){
+            d3.event.preventDefault();
+            controller.copyBibText.call(this);
+        });
+}; 

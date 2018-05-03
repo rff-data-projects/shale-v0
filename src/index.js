@@ -1,7 +1,7 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
 import { createBrowseButton, createTopicKey } from './components/BrowseButtons';
-import { createResultsContainer, createResultItem } from './components/ResultItems'; 
+import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
    
 (function(){     
 /* global d3 */
@@ -166,7 +166,7 @@ import { createResultsContainer, createResultItem } from './components/ResultIte
                 });
             }
             createResultsContainer.call(view);
-            view.filterResults(collectionItems);
+            filterResults.call(view, collectionItems, controller);
             view.filterSynthesisResults(synthesisItems);
             /*var promise = new Promise((resolve,reject) => {
                 d3.text('https://api.zotero.org/groups/' + groupId + '/collections/' + collectionKey + '/items?format=keys', (error,text) => {
@@ -362,7 +362,7 @@ import { createResultsContainer, createResultItem } from './components/ResultIte
                         .classed('active', false);
                     d3.select(this)
                         .classed('active', true);
-                    view.filterResults.call(view);
+                    filterResults.call(view, null, controller);
                     view.filterSynthesisResults.call(view,[]);
                 });
             showAll     
@@ -370,53 +370,6 @@ import { createResultsContainer, createResultItem } from './components/ResultIte
                 .text('Show all');
             createTopicKey();
         },
-        filterResults(matches){
-            console.log(matches);
-            console.log('filterResults', this);
-            var filteredData = matches === undefined ? model.zoteroItems : matches; 
-
-            var items = d3.select(this.results).selectAll('.list-item')
-                .data(filteredData, d => d.data.key);
-
-            // update existing
-          /*  items
-                .classed('entered',false)
-                .classed('remained', true);
-*/
-            // transition and remove exiting
-            items.exit()
-                .classed('entered',false)
-                .classed('exiting', true)
-                .transition(1500).remove();
-
-            var entering = items.enter()
-                .append('li')
-                .attr('class', (d,i) => d.key + ' ' + d.data.itemType + ' index-' + i + ( d.data.institution === 'RFF' || d.data.institution === 'Resources for the Future' ? ' RFF' : ''))
-                .classed('entering', true)
-                .classed('list-item', true)
-                .html(d => createResultItem(d))
-                .on('click', (d,i,nodes) => {
-                    if ( !d3.event.target.classList.contains('details-link') ){ // prevents links in the details section from triggering
-                                                                                // this event. stopPropagation() was not working as expected
-                        this.showDetails(nodes[i]);
-                    }
-                });
-
-            setTimeout(function(){
-                entering.classed('entering',false);   
-            });
-
-            this.items = entering.merge(items); 
-            d3.selectAll('.item-title-link')
-                .on('click', function(){
-                    d3.event.preventDefault();     
-                });
-            d3.selectAll('.copy-bib')
-                .on('click', function(){
-                    d3.event.preventDefault();
-                    controller.copyBibText.call(this);
-                });
-        },  
         showDetails(listItem){
             var $listItem = d3.select(listItem);
             $listItem
