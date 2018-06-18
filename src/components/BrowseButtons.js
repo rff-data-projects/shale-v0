@@ -1,20 +1,31 @@
 import styles from './browse-buttons.scss';
 console.log(styles);
-export const createBrowseCategory = function(category, index){
+export const createBrowseCategory = function(category, index, isCategorized){
   /* global d3, RFFApp */
   var categoryDiv = document.createElement('div');
-
+  var container;
+  
+  if ( isCategorized ){
+    categoryDiv.innerHTML = `
+      <h3>${category.data.name}</h3>
+    `;
+    container = document.createElement('div');
+    container.className = 'browse-buttons';
+    category.children.sort((a,b) => d3.ascending(a.data.name, b.data.name)).forEach((d,i) => {
+      container.appendChild(createBrowseButton(d,i));
+    });
+  } else {
+    container = document.querySelector('.browse-buttons.uncategorized') || document.createElement('div');
+    container.className = 'browse-buttons uncategorized';
+    if ( category.data.name.indexOf('_') !== 0 ){
+        container.appendChild(createBrowseButton(category));
+    }
+  }
   console.log(category);
-  categoryDiv.innerHTML = `
-    <h3>${category.data.name}</h3>
-  `;
-  var container = document.createElement('div');
-  container.className = 'browse-buttons';
-  category.children.sort((a,b) => d3.ascending(a.data.name, b.data.name)).forEach((d,i) => {
-    container.appendChild(createBrowseButton(d,i));
-  });
   categoryDiv.appendChild(container);
   console.log(categoryDiv);
+
+  
   return categoryDiv;
     
   function createBrowseButton(collection, i){
@@ -26,7 +37,7 @@ export const createBrowseCategory = function(category, index){
     console.log(styles,childrenClasses);
     var parent = document.createElement('div');
     parent.innerHTML = `
-    <div data-collection="${collection.key}" class="button button--secondary ${ childrenClasses.reduce((acc,cur) => acc + styles[cur] + ' ','')} ${ index === 0 && i === 0 ? 'active' : ''}">
+    <div data-collection="${collection.key}" class="button button--${ isCategorized ? 'secondary' : 'tertiary'} ${ childrenClasses.reduce((acc,cur) => acc + styles[cur] + ' ','')} ${ index === 0 && i === 0 && isCategorized ? 'active' : ''}">
       <span>${collection.data.name}</span>
     </div>`;
 

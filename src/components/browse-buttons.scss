@@ -44,7 +44,7 @@
 }
 
 
-.browse-buttons .button, #topic-key div {
+.browse-buttons:not(.uncategorized) .button, #topic-key div {
     
     &::before {
         @include topicDot();
@@ -59,6 +59,10 @@
         background: $blue;  
     }
     
+}
+
+.browse-buttons.uncategorized {
+    margin-top:1.5625em;
 }
 
 #topic-key {

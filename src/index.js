@@ -387,17 +387,19 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             console.log(categories);
             //model.collections.false.sort((a,b) => d3.ascending(a.data.name, b.data.name)); // 'false' key => top-lvel categories
             categories.filter(d => d.children !== undefined).forEach(function(d,i){
-                section.appendChild(createBrowseCategory(d,i));
-               // section.appendChild(createBrowseCategory(d, index));
+                section.appendChild(createBrowseCategory(d,i,true));
+            });
+            categories.filter(d => d.children === undefined).forEach(function(d,i){
+                section.appendChild(createBrowseCategory(d,i,false));
             });
             this.renderShowAllButton();
         },
         renderShowAllButton(){
-            var showAll = d3.select('#browse-buttons')  // should be in the view module
+            var showAll = d3.select('.browse-buttons.uncategorized')  // should be in the view module
                 .append('div')
                 .classed('button button--tertiary show-all',true)
                 .on('click', function(){
-                    d3.selectAll('#browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                    d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
                                                              // do the same thing
                         .classed('active', false);
                     d3.select(this)
