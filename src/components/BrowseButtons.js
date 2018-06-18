@@ -1,4 +1,5 @@
 import styles from './browse-buttons.scss';
+
 console.log(styles);
 export const createBrowseCategory = function(category, index, isCategorized){
   /* global d3, RFFApp */
@@ -37,7 +38,7 @@ export const createBrowseCategory = function(category, index, isCategorized){
     console.log(styles,childrenClasses);
     var parent = document.createElement('div');
     parent.innerHTML = `
-    <div data-collection="${collection.key}" class="button button--${ isCategorized ? 'secondary' : 'tertiary'} ${ childrenClasses.reduce((acc,cur) => acc + styles[cur] + ' ','')} ${ index === 0 && i === 0 && isCategorized ? 'active' : ''}">
+    <div title="not loaded" data-collection="${collection.key}" class="button button--${ isCategorized ? 'secondary' : 'tertiary'} ${ childrenClasses.reduce((acc,cur) => acc + styles[cur] + ' ','')} ${ index === 0 && i === 0 && isCategorized ? 'active' : ''}">
       <span>${collection.data.name}</span>
     </div>`;
 
@@ -51,7 +52,7 @@ export const createBrowseCategory = function(category, index, isCategorized){
         .classed(styles.active, true);
       RFFApp.controller.getCollectionItems(collection.data.key);
     };
-
+    
     return browseButton; 
   }
 }

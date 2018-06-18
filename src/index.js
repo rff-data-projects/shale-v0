@@ -2,16 +2,42 @@ import './css/main.scss';
 import '../helpers/string-helpers';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
+import tippy from 'tippy.js';
    
 (function(){     
 /* global d3 */
 "use strict";  
     const groupId = '2127948';
+    const tooltipKey = '1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA';
     var controller = { 
         gateCheck: 0,
         init(useLocal){ // pass in true to bypass API and use local data
+            window.RFFApp.model.tooltipPromise = new Promise((resolve, reject) => {
+                window.RFFApp.model.resolveTooltip = resolve;
+                window.RFFApp.model.rejectTooltip = reject;
+            });
+            window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
+                window.RFFApp.model.resolveTopicButtons = resolve;
+            });
+            this.returnCollectionTooltipTitles();
             this.getZoteroCollections(useLocal);
-            this.getZoteroItems(useLocal);  
+            this.getZoteroItems(useLocal);
+            Promise.all([window.RFFApp.model.tooltipPromise, window.RFFApp.model.topicButtonPromise]).then(values => {
+                this.setCollectionTooltips(values[0]);
+            });
+            
+        },
+        setCollectionTooltips(values){
+            document.querySelectorAll('.browse-buttons > div').forEach(btn => {
+                var match = values.find(d => d.key === btn.dataset.collection);
+                if ( match !== undefined ){
+                    btn.setAttribute('title', match.title);
+                    tippy.one(btn, {
+                        theme:'RFF',
+                        arrow: true
+                    });
+                }
+            });
         },
         childrenify(data){
             console.log(data); 
@@ -26,6 +52,30 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             }); 
             return data; 
  
+        },
+        returnCollectionTooltipTitles(){ // gets data from Google Sheet, converst rows to key-value pairs, nests the data
+                              // as specified by the config object, and creates array of summarized data at different
+                              // nesting levels                                
+                d3.json('https://sheets.googleapis.com/v4/spreadsheets/' + tooltipKey + '/values/Sheet1?key=AIzaSyDD3W5wJeJF2esffZMQxNtEl9tt-OfgSq4', (error,data) => { 
+                    if (error) {
+                        window.RFFApp.model.rejectTooltip(error);
+                        throw error;
+                    }
+                    var values = data.values;
+                    window.RFFApp.model.resolveTooltip(this.returnKeyValues(values)); 
+                });
+        },
+        returnKeyValues(values, coerce){
+            return values.slice(1).map(row => row.reduce((acc, cur, i) => { 
+            
+        
+                acc[values[0][i]] = coerce === true ? isNaN(+cur) || cur === '' ? cur : +cur : cur; 
+                return acc;
+        
+                                                  // test for empty strings before coercing bc +'' => 0
+            }, {}));
+            
+           
         },
         nestPrelim(nestByArray){
             // recursive  nesting function, prelim step to recursiveNest
@@ -392,6 +442,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             categories.filter(d => d.children === undefined).forEach(function(d,i){
                 section.appendChild(createBrowseCategory(d,i,false));
             });
+            window.RFFApp.model.resolveTopicButtons(true);
             this.renderShowAllButton();
         },
         renderShowAllButton(){

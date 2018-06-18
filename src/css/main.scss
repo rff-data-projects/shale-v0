@@ -43,3 +43,10 @@ h1, h2, h3, h4, h5, h6 {
  	align-items: center;
  }
 
+
+.tippy-tooltip.RFF-theme {
+  /* Your styling here. Example: */
+  background-color: rgba(#fff, 0.9);
+  border: 2px solid $blue;
+  color: $dark_gray;
+}
