@@ -1,6 +1,6 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
-import { createBrowseButton, createTopicKey } from './components/BrowseButtons';
+import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
    
 (function(){     
@@ -12,7 +12,6 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
         init(useLocal){ // pass in true to bypass API and use local data
             this.getZoteroCollections(useLocal);
             this.getZoteroItems(useLocal);  
-          //  view.init(); 
         },
         childrenify(data){
             console.log(data); 
@@ -28,12 +27,51 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             return data; 
  
         },
+        nestPrelim(nestByArray){
+            // recursive  nesting function, prelim step to recursiveNest
+            return nestByArray.reduce((acc, cur) => {
+                if (typeof cur !== 'string' && typeof cur !== 'function' ) { throw 'each nestBy item must be a string or function'; }
+                var rtn;
+                if ( typeof cur === 'string' ){
+                    rtn = acc.key(function(d){
+                        return d[cur];
+                    });    
+                }
+                if ( typeof cur === 'function' ){
+                    rtn = acc.key(function(d){
+                        return cur(d);
+                    });
+                }
+                
+                return rtn;
+            }, d3.nest());
+        },
+        recursiveNest(values, nestBy, nestType = 'series'){
+            
+            // nestBy = string or array of field(s) to nest by, or a custom function, or an array of strings or functions;
+                      
+            if ( typeof nestBy === 'string' || typeof nestBy === 'function' ) { // ie only one nestBy field or funciton
+                this.nestByArray = [nestBy];
+            } else {
+                if (!Array.isArray(nestBy)) { throw 'nestBy variable must be a string, function, or array of strings or functions'; }
+                this.nestByArray = nestBy;
+            }
+            var prelim = this.nestPrelim(this.nestByArray);
+            
+            if ( nestType === 'object' ){
+                return prelim
+                    .object(values);
+            } else {
+                return prelim
+                    .entries(values);
+            }
+        },
         getZoteroCollections(useLocal){ // IMPORTANT this will break if # of collections exceeds 100. will needs to 
                                 // implement strategy use for getting items
 
             
             if ( useLocal ){
-                d3.json('data/zoteroCollections-4-11-18.json', (error,data) => {
+                d3.json('data/zoteroCollections-6-18-18.json', (error,data) => {
                     if ( error ) {
                         throw error;
                     }
@@ -52,6 +90,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                     }
                     console.log(JSON.stringify(data));
                     model.collections = this.childrenify(data);
+                   // model.collections = this.recursiveNest(data, [d => d.data.parentCollection, d => d.data.parentCollection]);
                     resolve(model.collections); 
                 });
             });
@@ -67,7 +106,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
         getZoteroItems(useLocal){
 
             if ( useLocal ){
-                d3.json('data/zoteroItems-4-11-18.json', (error,data) => {
+                d3.json('data/zoteroItems-6-18-18.json', (error,data) => {
                     if ( error ) {
                         throw error;
                     }
@@ -94,6 +133,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                             reject(error);
                             throw error;
                         }
+                        console.log(xhr);
                         resolve({
                             total: +xhr.getResponseHeader('Total-Results'), // + operand coerces to number
                             data: JSON.parse(xhr.responseText)
@@ -148,7 +188,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                 d.data.dateValue = parsedDates.value;
             }); 
             model.zoteroItems.sort((a,b) => d3.descending(a.data.dateValue, b.data.dateValue)); 
-        },
+      },
         getCollectionItems(collectionKey){
             console.log(collectionKey);
             var collection = model.collections.find(c => c.key === collectionKey );
@@ -338,17 +378,17 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             console.log(model.zoteroItems);
             this.renderTopicButtons();
             console.log(model.collections);
-            controller.getCollectionItems(model.collections.find(c => c.data.parentCollection === false).key);
+            var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
+            controller.getCollectionItems(initialCategory);
         },
         renderTopicButtons(){
-            var section = document.getElementById('browse-buttons'),
-                index = 0;
-            model.collections.sort((a,b) => d3.ascending(a.data.name, b.data.name));
-            model.collections.forEach(function(d){
-                if ( d.data.parentCollection === false ) { // i.e. is a top-level collection
-                    section.appendChild(createBrowseButton(d, index));
-                    index++;
-                }
+            var section = document.getElementById('browse-buttons-container');
+            var categories = model.collections.filter(d => d.data.parentCollection === false).sort((a,b) => d3.ascending(a.data.name, b.data.name));
+            console.log(categories);
+            //model.collections.false.sort((a,b) => d3.ascending(a.data.name, b.data.name)); // 'false' key => top-lvel categories
+            categories.filter(d => d.children !== undefined).forEach(function(d,i){
+                section.appendChild(createBrowseCategory(d,i));
+               // section.appendChild(createBrowseCategory(d, index));
             });
             this.renderShowAllButton();
         },
