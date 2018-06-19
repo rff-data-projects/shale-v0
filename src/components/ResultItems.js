@@ -40,7 +40,8 @@ export const createResultItem = function(d){
     var publisher = d.data.publisher || d.data.journalAbbreviation || d.data.publicationTitle || d.data.institution || d.data.websiteTitle || '';
 
     var linksDiv = document.createElement('div');
-    linksDiv.className = styles['links-div'];
+    linksDiv.className = styles['links-div'] + ' tippy-clipboard';
+    linksDiv.setAttribute('title', 'Copied to clipboard');
     var pubURL;
     if ( d.data.url && d.data.url !== '' ) {
         let link = document.createElement('a');
@@ -62,6 +63,7 @@ export const createResultItem = function(d){
         let link = document.createElement('a');
         link.setAttribute('href', '#');
         link.setAttribute('class',`${styles['copy-bib']}`);
+        link.setAttribute('title', textOnly);
         link.innerHTML = 'Copy biblio. info';
         linksDiv.appendChild(bibContainer);
         linksDiv.appendChild(link);

@@ -402,7 +402,11 @@ import tippy from 'tippy.js';
             var msg = successful ? 'successful' : 'unsuccessful';
             console.log('Copying text command was ' + msg);
             if ( successful ) {
-                alert('Bibliographical entry copied to clipboard');
+                this.parentNode._tippy.show();
+                setTimeout(() => {
+                    this.parentNode._tippy.hide();
+                },1000);
+                //this._tippy.popper.querySelector('.tippy-content').textContent = 'Copied to clipboard';
             }
           } catch (err) {
             console.log('Oops, unable to copy');
@@ -430,6 +434,20 @@ import tippy from 'tippy.js';
             console.log(model.collections);
             var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
             controller.getCollectionItems(initialCategory);
+            this.biblioTooltips();
+        },
+        biblioTooltips(){
+            tippy('.tippy-clipboard', {
+                arrow: true,
+                theme:'RFF',
+                trigger: 'manual'
+            });
+            tippy('.copy-bib', {
+                arrow: true,
+                hideOnClick: false,
+                interactive: true,
+                theme:'RFF',
+            });
         },
         renderTopicButtons(){
             var section = document.getElementById('browse-buttons-container');
