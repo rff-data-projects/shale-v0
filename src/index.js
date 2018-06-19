@@ -463,11 +463,7 @@ import tippy from 'tippy.js';
                 .text('Show all');
             createTopicKey();
         },
-        showDetails(listItem){
-            var $listItem = d3.select(listItem);
-            $listItem
-                .classed('show-details', !$listItem.classed('show-details'));
-        },
+
         filterSynthesisResults(matches){ // needs to be more DRY re: code above
             console.log(matches);
             var items = d3.select('#synthesis-results ul').selectAll('.list-item')
@@ -495,11 +491,6 @@ import tippy from 'tippy.js';
             });
 
             this.synthesisItems = entering.merge(items); 
-
-            d3.selectAll('.item-title-link')
-                .on('click', function(){
-                    d3.event.preventDefault();     
-                });
 
         }
     };

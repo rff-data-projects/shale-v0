@@ -16,7 +16,6 @@ export const createResultsContainer = function(){
 /* ******** */
 
 export const createResultItem = function(d){
-    /* global RFFApp */
     var authorStr,
         authors;
     if ( d.data.creators === undefined ) {
@@ -39,7 +38,41 @@ export const createResultItem = function(d){
     
 
     var publisher = d.data.publisher || d.data.journalAbbreviation || d.data.publicationTitle || d.data.institution || d.data.websiteTitle || '';
-    var details = '';
+
+    var linksDiv = document.createElement('div');
+    linksDiv.className = styles['links-div'];
+    var pubURL;
+    if ( d.data.url && d.data.url !== '' ) {
+        let link = document.createElement('a');
+        pubURL = d.data.url;
+        link.setAttribute('href', pubURL);
+        link.setAttribute('target', '_blank')
+        link.setAttribute('class',`${styles['details-link']}`);
+        link.innerHTML = 'Go to link';
+        linksDiv.appendChild(link);
+    }
+
+    if ( d.bib && d.bib !== '' ) {
+        let placeholder = document.createElement('div');
+        placeholder.innerHTML = d.bib;
+        let textOnly = placeholder.querySelector('.csl-entry').innerHTML;
+        let bibContainer = document.createElement('textarea');
+        bibContainer.innerHTML = textOnly;
+        bibContainer.setAttribute('class',styles['bib-container']);
+        let link = document.createElement('a');
+        link.setAttribute('href', '#');
+        link.setAttribute('class',`${styles['copy-bib']}`);
+        link.innerHTML = 'Copy biblio. info';
+        linksDiv.appendChild(bibContainer);
+        linksDiv.appendChild(link);
+    }
+    var titleInnerHTML;
+    if ( pubURL !== undefined ){
+      titleInnerHTML = `<a class="item-title-link" target="_blank" href="${pubURL}">${d.data.title}</a>`;
+    } else {
+      titleInnerHTML = `${d.data.title}`;
+    }
+    /*var details = ''; 
 
     var topics = '';
 
@@ -86,12 +119,10 @@ export const createResultItem = function(d){
 
     
 
-    details = details !== '' ? details : '< nothing to show >';
+    details = details !== '' ? details : '< nothing to show >';*/
 
       return `
-              <div class="${styles['detail-results-wrapper']}">
-                  <div class="${styles['detail-results']}">${ details }</div>
-              </div>
+              
               <div class="${styles['summary-results']}">
                   <div class="flex space-between">
                       <span class="flex ${styles['item-info']} ${styles['items-center']}">
@@ -100,8 +131,9 @@ export const createResultItem = function(d){
                       </span>
                       <span class="list-item__meta">${d.data.dateString}</span>
                   </div>
-                  <h3 class="list-item__title"><a class="item-title-link" href="#">${d.data.title}</a></h3>
+                  <h3 class="list-item__title">${titleInnerHTML}</h3>
                   <span class="list-item__meta">${authorStr}</span>
+                  ${linksDiv.outerHTML}
               </div>
               `;
 }
@@ -134,25 +166,20 @@ export const filterResults = function(matches, controller){
         .attr('class', (d,i) => d.key + ' ' + d.data.itemType + ' index-' + i + ( d.data.institution === 'RFF' || d.data.institution === 'Resources for the Future' ? ' RFF' : ''))
         .classed('entering', true)
         .classed('list-item', true)
-        .html(d => createResultItem(d))
-        .on('click', (d,i,nodes) => {
-            if ( !d3.event.target.classList.contains('details-link') ){ // prevents links in the details section from triggering
-                                                                        // this event. stopPropagation() was not working as expected
-                this.showDetails(nodes[i]);
-            }
-        });
+        .html(d => createResultItem(d));
+        
 
     setTimeout(function(){
         entering.classed('entering',false);   
     });
 
     this.items = entering.merge(items); 
-    d3.selectAll('.item-title-link')
+   /* d3.selectAll('.item-title-link')
         .on('click', function(){
             console.log('click');
             console.log(d3.event);
             d3.event.preventDefault();     
-        });
+        });*/
     d3.selectAll('.copy-bib')
         .on('click', function(){
             d3.event.preventDefault();

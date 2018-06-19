@@ -38,7 +38,6 @@
         padding: 0;
         border: 1px solid transparent;
         border-bottom-color: #e6e7e8;
-        cursor: pointer;
         &:hover {
             border-color: $gold;
             border-bottom-color:$gold;
@@ -72,10 +71,7 @@
             transform: translateX(320px);
             overflow-y:auto;
             overflow-x: hidden;
-            .bib-container {
-                position: absolute;
-                left: 100%;
-            }
+            
             
         }
         
@@ -211,5 +207,49 @@
     .RFF & {
         padding-left: 30px;
         /*background: url(../assets/logo.svg) no-repeat;*/
+    }
+}
+
+.links-div {
+    position: absolute;
+    bottom: .9375em;
+    right: .9375em;
+    a, a:visited, a:active {
+        font-size: 12px;
+        color: $dark_gray;
+        padding: 5px;
+        background: #fff;
+        border: 1px solid $a11y_gray;
+        text-decoration: none;
+        border-radius: 3px;
+        margin-left: .9375em;
+        opacity: 0.7;
+        transition: opacity 0.2s linear, border-color 0.2s linear, color 0.2s linear, background-color 0.2s linear;
+        //font-weight: bold;
+        .list-item:hover & {
+            opacity: 1;
+            &.details-link {
+                border-color:$blue;
+            }
+        }
+        &:hover {
+            &.details-link {
+                color:#fff;
+                background-color:$blue;
+            }
+            &.copy-bib {
+                color:#fff;
+                background-color:$dark_gray;
+                
+
+            }
+        }
+
+    }
+    .bib-container {
+        //visibility: hidden;
+        position: absolute;
+        opacity:0;
+        z-index:-1;
     }
 }
