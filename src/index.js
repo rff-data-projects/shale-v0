@@ -25,7 +25,35 @@ import tippy from 'tippy.js';
             Promise.all([window.RFFApp.model.tooltipPromise, window.RFFApp.model.topicButtonPromise]).then(values => {
                 this.setCollectionTooltips(values[0]);
             });
+            this.onSearch();
             
+        },
+        onSearch(){
+            document.getElementById('collection-search').onsubmit = function(e){
+                e.preventDefault();
+                var input = this.querySelector('input').value;
+                var promise = new Promise((resolve,reject) => {
+                    d3.text('https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys', (error,data) => {
+                        if (error) {
+                            reject(error);
+                            throw error;
+                        }
+                        
+                        resolve(data.split(/\n/)); 
+                    });
+                });
+                promise.then(v => {
+                    console.log(v);
+                    if (v[0] !== ''){
+                        controller.getSearchItems(v);
+                    }
+                });
+            };
+        },
+        getSearchItems(keys){
+            var searchItems = model.zoteroItems.filter(item => keys.indexOf(item.key) !== -1 );
+            console.log(searchItems);
+            filterResults.call(view, searchItems, controller);
         },
         setCollectionTooltips(values){
             document.querySelectorAll('.browse-buttons > div').forEach(btn => {
@@ -473,7 +501,7 @@ import tippy from 'tippy.js';
                         .classed('active', false);
                     d3.select(this)
                         .classed('active', true);
-                    filterResults.call(view, null, controller);
+                    filterResults.call(view, undefined, controller);
                     view.filterSynthesisResults.call(view,[]);
                 });
             showAll     

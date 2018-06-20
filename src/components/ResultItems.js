@@ -144,20 +144,19 @@ export const createResultItem = function(d){
 /* ******** */
 
 export const filterResults = function(matches, controller){
-  /* global model, d3 */
-    console.log(controller);
-    console.log('filterResults', this);
-    var filteredData = matches === undefined ? model.zoteroItems : matches; 
+  /* global d3 */
+  console.log(styles['list-item']);
+    var filteredData = matches === undefined ? window.RFFApp.model.zoteroItems : matches; 
+    var items = d3.select(this.results).selectAll('.' + styles['list-item'])
+        .data(filteredData, d => d.key);
 
-    var items = d3.select(this.results).selectAll(styles['list-item'])
-        .data(filteredData, d => d.data.key);
-
-    // update existing
+        // update existing
   /*  items
         .classed('entered',false)
         .classed('remained', true);
 */
     // transition and remove exiting
+    
     items.exit()
         .classed(styles.entered,false)
         .classed(styles.exiting, true)
@@ -187,4 +186,8 @@ export const filterResults = function(matches, controller){
             d3.event.preventDefault();
             controller.copyBibText.call(this);
         });
+
+
+
+
 }; 
