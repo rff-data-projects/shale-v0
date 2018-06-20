@@ -1,0 +1,77 @@
+
+<!doctype html>
+<html lang="EN">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <title>Shale Research Clearinghouse</title>
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/3.5.16/iframeResizer.contentWindow.js"></script>
+        <link rel="stylesheet" href="https://use.typekit.net/oxc7jph.css" /> 
+        <link rel="stylesheet" type="text/css" href="http://www.rff.org/modules/system/system.base.css" />
+        <link rel="stylesheet" type="text/css" href="http://www.rff.org/sites/all/themes/rff_theme/css/styles.css" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script type="text/javascript">
+            (function() {
+                var trial = document.createElement('script');
+                trial.type = 'text/javascript';
+                trial.async = true;
+                trial.src = 'https://easy.myfonts.net/v2/js?sid=135028(font-family=Trade+Gothic)&sid=218102(font-family=Trade+Gothic+Pro+Light)&sid=218103(font-family=Trade+Gothic+Pro+Roman)&sid=218104(font-family=Trade+Gothic+Pro+Bold)&key=wV0rVBuwME';
+                var head = document.getElementsByTagName("head")[0];
+                head.appendChild(trial);
+            })();
+</script>
+    </head>
+    <body>
+        <div class="container"> 
+            <div class="l-1up">
+                <h1>Shale Research Clearinghouse</h1>
+            </div>
+            <div class="l-66-33--1">
+                <noscript>This page requires javascript; please enable it.</noscript>
+                <p>The Shale Research Clearinghouse (SHARC) is a publicly accessible, curated repository for information on the economic, health, and environmental impacts of oil and gas development.</p>
+                <h2>Search</h2>
+                <form id="collection-search" role="search">
+                  <div>
+                    <input type="search" 
+                     placeholder="Search the collection..."
+                     aria-label="Search the collection">
+                    <button>Search</button>
+                  </div>
+                </form>
+                <form id="search-type">
+                  <fieldset>
+                    <label for="search-by-field"><input type="radio" id="search-by-field" name="search-type" value="fields" checked>Search title, creator, and year</label>
+                    <label for="search-by-text"><input type="radio" id="search-by-text" name="search-type" value="text">Search full text (slower but more results)</label>
+                  </fieldset>
+                </form>
+                <h2>Browse by topic</h2>
+                <div id="browse-buttons-container">
+                </div>
+            </div>
+            <div class="l-66-33--2">
+            </div>
+        </div>
+        <div class="container"> 
+            <div class="l-66-33--1" id="results-container">
+                
+            </div>
+        </div>
+        <script>
+            function isInIframe() { // ht: https://stackoverflow.com/a/326076
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true;
+                }
+            }
+            if ( isInIframe() ){
+                console.log(this.parent.parentVar); // testing access to parent window variables
+            }
+        </script>
+            <script src="js/index.js" type="text/javascript"></script>
+    </body>
+</html>
