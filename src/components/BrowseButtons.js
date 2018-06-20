@@ -47,9 +47,9 @@ export const createBrowseCategory = function(category, index, isCategorized){
     browseButton.onclick = function(){
       console.log(this);
       d3.selectAll('.browse-buttons .button')
-        .classed(styles.active, false);
+        .classed('active', false);
       d3.select(this)
-        .classed(styles.active, true);
+        .classed('active', true);
       RFFApp.controller.getCollectionItems(collection.data.key);
     };
     
@@ -59,8 +59,8 @@ export const createBrowseCategory = function(category, index, isCategorized){
 
 export const createTopicKey = function(){
   var cont = document.getElementById('browse-buttons-container');
-  var html = `<div id="${styles['topic-key']}">
-                  <div class="${styles['issue-brief']}">= issue brief and literature review available</div>
+  var html = `<div id="topic-key">
+                  <div class="issue-brief">= issue brief and literature review available</div>
                   <div>= issue brief and literature review still to come</div>
               </div>`;
   cont.insertAdjacentHTML('beforeend', html);

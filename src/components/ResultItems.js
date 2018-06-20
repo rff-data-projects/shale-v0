@@ -3,11 +3,11 @@ console.log(styles);
 /* ******** */
 
 export const createResultsContainer = function(){
-  var html = `<div class="${styles['synthesis-results']}">
+  var html = `<div class="synthesis-results">
                   <ul class="flex space-between"></ul>
               </div>
-              <div class="${styles.results}">
-                  <ul class="${styles.load}"></ul>
+              <div class="results">
+                  <ul class="load"></ul>
               </div> `;
   document.getElementById('results-container').innerHTML = html;
   this.results = document.querySelector('div.results ul');
@@ -40,7 +40,7 @@ export const createResultItem = function(d){
     var publisher = d.data.publisher || d.data.journalAbbreviation || d.data.publicationTitle || d.data.institution || d.data.websiteTitle || '';
 
     var linksDiv = document.createElement('div');
-    linksDiv.className = styles['links-div'] + ' tippy-clipboard';
+    linksDiv.className = 'links-div' + ' tippy-clipboard';
     linksDiv.setAttribute('title', 'Copied to clipboard');
     var pubURL;
     if ( d.data.url && d.data.url !== '' ) {
@@ -48,7 +48,7 @@ export const createResultItem = function(d){
         pubURL = d.data.url;
         link.setAttribute('href', pubURL);
         link.setAttribute('target', '_blank')
-        link.setAttribute('class',`${styles['details-link']}`);
+        link.setAttribute('class',`details-link`);
         link.innerHTML = 'Go to link';
         linksDiv.appendChild(link);
     }
@@ -59,10 +59,10 @@ export const createResultItem = function(d){
         let textOnly = placeholder.querySelector('.csl-entry').innerHTML;
         let bibContainer = document.createElement('textarea');
         bibContainer.innerHTML = textOnly;
-        bibContainer.setAttribute('class',styles['bib-container']);
+        bibContainer.setAttribute('class','bib-container');
         let link = document.createElement('a');
         link.setAttribute('href', '#');
-        link.setAttribute('class',`${styles['copy-bib']}`);
+        link.setAttribute('class',`copy-bib`);
         link.setAttribute('title', textOnly);
         link.innerHTML = 'Copy biblio. info';
         linksDiv.appendChild(bibContainer);
@@ -125,11 +125,11 @@ export const createResultItem = function(d){
 
       return `
               
-              <div class="${styles['summary-results']}">
+              <div class="summary-results">
                   <div class="flex space-between">
-                      <span class="flex ${styles['item-info']} ${styles['items-center']}">
+                      <span class="flex item-info items-center">
                           <span class="list-item__label">${d.synthesisType || d.data.itemType.undoCamelCase()}</span>
-                          <span class="list-item__meta ${styles['publisher-name']}">${publisher.trunc(90,true)}</span>
+                          <span class="list-item__meta publisher-name">${publisher.trunc(90,true)}</span>
                       </span>
                       <span class="list-item__meta">${d.data.dateString}</span>
                   </div>
@@ -145,9 +145,9 @@ export const createResultItem = function(d){
 
 export const filterResults = function(matches, controller){
   /* global d3 */
-  console.log(styles['list-item']);
+  console.log('list-item');
     var filteredData = matches === undefined ? window.RFFApp.model.zoteroItems : matches; 
-    var items = d3.select(this.results).selectAll('.' + styles['list-item'])
+    var items = d3.select(this.results).selectAll('.' + 'list-item')
         .data(filteredData, d => d.key);
 
         // update existing
@@ -158,8 +158,8 @@ export const filterResults = function(matches, controller){
     // transition and remove exiting
     
     items.exit()
-        .classed(styles.entered,false)
-        .classed(styles.exiting, true)
+        .classed('entered',false)
+        .classed('exiting', true)
         .transition(1500).remove();
 
     var entering = items.enter()
