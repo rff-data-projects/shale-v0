@@ -187,7 +187,7 @@ export const filterResults = function(matches, controller){
             controller.copyBibText.call(this);
         });
 
-
+     controller.biblioTooltips();
 
 
 }; 

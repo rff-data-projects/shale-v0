@@ -11,7 +11,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
     const tooltipKey = '1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA';
     var controller = { 
         gateCheck: 0,
-        tippy, // make tippy a property of the controller so it can be accessed elsewhere
+        searchType: 'fields',
         init(useLocal){ // pass in true to bypass API and use local data
             window.RFFApp.model.tooltipPromise = new Promise((resolve, reject) => {
                 window.RFFApp.model.resolveTooltip = resolve;
@@ -26,15 +26,19 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             Promise.all([window.RFFApp.model.tooltipPromise, window.RFFApp.model.topicButtonPromise]).then(values => {
                 this.setCollectionTooltips(values[0]);
             });
-            this.onSearch();
+            this.setupSearch();
             
         },
-        onSearch(){
+        setupSearch(){
+            document.getElementById('search-type').onchange = function(e){
+                controller.searchType = e.target.value;
+            };
             document.getElementById('collection-search').onsubmit = function(e){
                 e.preventDefault();
                 var input = this.querySelector('input').value;
+                var APIString = controller.searchType === 'fields' ? 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys' : 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys&qmode=everything';
                 var promise = new Promise((resolve,reject) => {
-                    d3.text('https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys', (error,data) => {
+                    d3.text(APIString, (error,data) => {
                         if (error) {
                             reject(error);
                             throw error;
@@ -421,6 +425,19 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                 display
             };
         },
+        biblioTooltips(){
+            tippy('.tippy-clipboard', {
+                arrow: true,
+                theme:'RFF',
+                trigger: 'manual'
+            });
+            tippy('.copy-bib', {
+                arrow: true,
+                hideOnClick: false,
+                interactive: true,
+                theme:'RFF',
+            });
+        },
         copyBibText(){
           // this = element
           var bibEntry = this.parentNode.querySelector('.bib-container');
@@ -465,19 +482,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             controller.getCollectionItems(initialCategory);
            
         },
-        biblioTooltips(){
-            tippy('.tippy-clipboard', {
-                arrow: true,
-                theme:'RFF',
-                trigger: 'manual'
-            });
-            tippy('.copy-bib', {
-                arrow: true,
-                hideOnClick: false,
-                interactive: true,
-                theme:'RFF',
-            });
-        },
+        
         renderTopicButtons(){
             var section = document.getElementById('browse-buttons-container');
             var categories = model.collections.filter(d => d.data.parentCollection === false).sort((a,b) => d3.ascending(a.data.name, b.data.name));
@@ -538,7 +543,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             });
 
             this.synthesisItems = entering.merge(items); 
-            this.biblioTooltips();
+           
 
         }
     };
