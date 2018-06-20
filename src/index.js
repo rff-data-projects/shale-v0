@@ -1,8 +1,8 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
+import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
-import tippy from 'tippy.js';
    
 (function(){     
 /* global d3 */
@@ -11,6 +11,7 @@ import tippy from 'tippy.js';
     const tooltipKey = '1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA';
     var controller = { 
         gateCheck: 0,
+        tippy, // make tippy a property of the controller so it can be accessed elsewhere
         init(useLocal){ // pass in true to bypass API and use local data
             window.RFFApp.model.tooltipPromise = new Promise((resolve, reject) => {
                 window.RFFApp.model.resolveTooltip = resolve;
@@ -462,7 +463,7 @@ import tippy from 'tippy.js';
             console.log(model.collections);
             var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
             controller.getCollectionItems(initialCategory);
-            this.biblioTooltips();
+           
         },
         biblioTooltips(){
             tippy('.tippy-clipboard', {
@@ -537,6 +538,7 @@ import tippy from 'tippy.js';
             });
 
             this.synthesisItems = entering.merge(items); 
+            this.biblioTooltips();
 
         }
     };
