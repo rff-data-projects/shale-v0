@@ -518,7 +518,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
 
         filterSynthesisResults(matches){ // needs to be more DRY re: code above
             console.log(matches);
-            var items = d3.select('#synthesis-results ul').selectAll('.list-item')
+            var items = d3.select('.synthesis-results ul').selectAll('.list-item')
                 .data(matches, d => d.data.key);
                 console.log(items);
             items.exit()
