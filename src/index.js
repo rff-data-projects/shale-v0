@@ -30,13 +30,11 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             
         },
         setupSearch(){
-            document.getElementById('search-type').onchange = function(e){
-                controller.searchType = e.target.value;
-            };
             document.getElementById('collection-search').onsubmit = function(e){
                 e.preventDefault();
+                view.loading(true);
                 var input = this.querySelector('input').value;
-                var APIString = controller.searchType === 'fields' ? 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys' : 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys&qmode=everything';
+                var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
                 var promise = new Promise((resolve,reject) => {
                     d3.text(APIString, (error,data) => {
                         if (error) {
@@ -51,6 +49,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                     console.log(v);
                     if (v[0] !== ''){
                         controller.getSearchItems(v);
+                        view.loading(false);
                     }
                 });
             };
@@ -480,9 +479,16 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             console.log(model.collections);
             var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
             controller.getCollectionItems(initialCategory);
+            this.loading(false);
            
         },
-        
+        loading(isLoading){
+            if ( isLoading ){
+                document.querySelector('body').classList.add('loading');
+            } else {
+                document.querySelector('body').classList.remove('loading');
+            }
+        },
         renderTopicButtons(){
             var section = document.getElementById('browse-buttons-container');
             var categories = model.collections.filter(d => d.data.parentCollection === false).sort((a,b) => d3.ascending(a.data.name, b.data.name));

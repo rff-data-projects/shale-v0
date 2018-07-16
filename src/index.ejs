@@ -41,7 +41,7 @@ htmlWebpackPlugin.options.scripts = htmlWebpackPlugin.options.scripts || []
             })();
 </script>
     </head>
-    <body>
+    <body class="loading">
         <div class="container"> 
             <div class="l-1up">
                 <h1>Shale Research Clearinghouse</h1>
@@ -53,16 +53,10 @@ htmlWebpackPlugin.options.scripts = htmlWebpackPlugin.options.scripts || []
                 <form id="collection-search" role="search">
                   <div>
                     <input type="search" 
-                     placeholder="Search the collection..."
-                     aria-label="Search the collection">
+                     placeholder="Search the collection (by title, author, or year)"
+                     aria-label="Search the collection (by title, author, or year)">
                     <button>Search</button>
                   </div>
-                </form>
-                <form id="search-type">
-                  <fieldset>
-                    <label for="search-by-field"><input type="radio" id="search-by-field" name="search-type" value="fields" checked>Search title, creator, and year</label>
-                    <label for="search-by-text"><input type="radio" id="search-by-text" name="search-type" value="text">Search full text (slower but more results)</label>
-                  </fieldset>
                 </form>
                 <h2>Browse by topic</h2>
                 <div id="browse-buttons-container">

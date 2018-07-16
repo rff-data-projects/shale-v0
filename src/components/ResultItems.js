@@ -7,7 +7,7 @@ export const createResultsContainer = function(){
                   <ul class="flex space-between"></ul>
               </div>
               <div class="results">
-                  <ul class="load"></ul>
+                  <ul class="loadable"></ul>
               </div> `;
   document.getElementById('results-container').innerHTML = html;
   this.results = document.querySelector('div.results ul');

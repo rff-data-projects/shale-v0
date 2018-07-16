@@ -1,8 +1,9 @@
 @import '../css/variables.scss';
 
-.load {
-    /*background: url(../assets/spinner.svg) no-repeat 50% 50%;*/
-    background-size: 200px;
+.loading .loadable {
+    background: url(/assets/spinner.svg) no-repeat;
+    background-size: 40px;
+
 }
 
 .synthesis-results li {
@@ -21,9 +22,13 @@
 
 .results, .synthesis-results {
     width: 100%;
+
     
     ul {
-        padding: 0;
+        padding: 40px 0 0 0;
+        .loading & {
+            opacity: 0.5;
+        }
     }
     .list-item.show-details {
         .summary-results {
@@ -206,7 +211,7 @@
 .item-info {
     .RFF & {
         padding-left: 30px;
-        /*background: url(../assets/logo.svg) no-repeat;*/
+        background: url(/assets/logo.svg) no-repeat;
     }
 }
 
