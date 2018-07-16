@@ -1,5 +1,6 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
+import tooltips from './data/tooltips.csv';
 import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
@@ -8,25 +9,17 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
 /* global d3 */
 "use strict";  
     const groupId = '2127948';
-    const tooltipKey = '1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA';
     var controller = { 
         gateCheck: 0,
         searchType: 'fields',
         init(useLocal){ // pass in true to bypass API and use local data
-            window.RFFApp.model.tooltipPromise = new Promise((resolve, reject) => {
-                window.RFFApp.model.resolveTooltip = resolve;
-                window.RFFApp.model.rejectTooltip = reject;
-            });
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
             });
-            this.returnCollectionTooltipTitles();
             this.getZoteroCollections(useLocal);
             this.getZoteroItems(useLocal);
-            Promise.all([window.RFFApp.model.tooltipPromise, window.RFFApp.model.topicButtonPromise]).then(values => {
-                this.setCollectionTooltips(values[0]);
-            });
             this.setupSearch();
+            console.log(tooltips);
             
         },
         setupSearch(){
@@ -59,18 +52,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             console.log(searchItems);
             filterResults.call(view, searchItems, controller);
         },
-        setCollectionTooltips(values){
-            document.querySelectorAll('.browse-buttons > div').forEach(btn => {
-                var match = values.find(d => d.key === btn.dataset.collection);
-                if ( match !== undefined ){
-                    btn.setAttribute('title', match.title);
-                    tippy.one(btn, {
-                        theme:'RFF',
-                        arrow: true
-                    });
-                }
-            });
-        },
+       
         childrenify(data){
             console.log(data); 
             data.forEach(d => {
@@ -84,18 +66,6 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             }); 
             return data; 
  
-        },
-        returnCollectionTooltipTitles(){ // gets data from Google Sheet, converst rows to key-value pairs, nests the data
-                              // as specified by the config object, and creates array of summarized data at different
-                              // nesting levels                                
-                d3.json('https://sheets.googleapis.com/v4/spreadsheets/' + tooltipKey + '/values/Sheet1?key=AIzaSyDD3W5wJeJF2esffZMQxNtEl9tt-OfgSq4', (error,data) => { 
-                    if (error) {
-                        window.RFFApp.model.rejectTooltip(error);
-                        throw error;
-                    }
-                    var values = data.values;
-                    window.RFFApp.model.resolveTooltip(this.returnKeyValues(values)); 
-                });
         },
         returnKeyValues(values, coerce){
             return values.slice(1).map(row => row.reduce((acc, cur, i) => { 
@@ -477,12 +447,25 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             console.log('READY!');
             console.log(model.zoteroItems);
             this.renderTopicButtons();
+            this.attachTooltips();
             console.log(model.collections);
             var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
             controller.getCollectionItems(initialCategory);
             this.setupSidebar();
             this.loading(false);
            
+        },
+        attachTooltips(){
+            document.querySelectorAll('.browse-buttons > div').forEach(btn => {
+                var match = tooltips.find(d => d.key === btn.dataset.collection);
+                if ( match !== undefined ){
+                    btn.setAttribute('title', match.title);
+                    tippy.one(btn, {
+                        theme:'RFF',
+                        arrow: true
+                    });
+                }
+            });
         },
         setupSidebar(){
           
@@ -529,7 +512,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             div.className = 'contact-us';
           div.innerHTML = `
             <h3>Questions? Get in touch</h3>
-              <form method="POST" action="http://formspree.io/john@osterman.io" _lpchecked="1">
+              <form><!--<form method="POST" action="http://formspree.io/XXXXXXX" _lpchecked="1">-->
               <input type="email" name="email" placeholder="Your email">
               <textarea name="message" placeholder="Your message"></textarea>
                 <input type="text" name="_gotcha" style="display:none">
