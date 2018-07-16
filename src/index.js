@@ -153,7 +153,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
 
             
             if ( useLocal ){
-                d3.json('data/zoteroCollections-6-18-18.json', (error,data) => {
+                d3.json('data/zoteroCollections-7-16-18.json', (error,data) => {
                     if ( error ) {
                         throw error;
                     }
@@ -185,10 +185,10 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                 view.init();
             }); 
         }, 
-        getZoteroItems(useLocal){
+        getZoteroItems(useLocal){   
 
             if ( useLocal ){
-                d3.json('data/zoteroItems-6-18-18.json', (error,data) => {
+                d3.json('data/zoteroItems-7-16-18.json', (error,data) => {
                     if ( error ) {
                         throw error;
                     }
@@ -215,7 +215,8 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
                             reject(error);
                             throw error;
                         }
-                        console.log(xhr);
+                        console.log(+xhr.getResponseHeader('last-modified-version'));
+                        //model.lastModifiedVersion = model.lastModifiedVersion || +xhr.getResponseHeader('last-modified-version');
                         resolve({
                             total: +xhr.getResponseHeader('Total-Results'), // + operand coerces to number
                             data: JSON.parse(xhr.responseText)
@@ -463,7 +464,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
     }; 
  
     var model = {
-        zoteroItems: []   
+        zoteroItems: []
     }; 
     
     var view = { 
@@ -479,8 +480,184 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
             console.log(model.collections);
             var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
             controller.getCollectionItems(initialCategory);
+            this.setupSidebar();
             this.loading(false);
            
+        },
+        setupSidebar(){
+          
+            var months = {
+                '0': 'January',
+                '1': 'February',
+                '2': 'March',
+                '3': 'April',
+                '4': 'May',
+                '5': 'June',
+                '6': 'July',
+                '7': 'August',
+                '8': 'September',
+                '9': 'October',
+               '10': 'November',
+               '11': 'December'
+            };
+            var lastModifiedDate = d3.max(model.zoteroItems, d => new Date(d.data.dateModified));
+            var version = d3.max(model.zoteroItems, d => d.data.version);
+            var sidebar = document.querySelector('#sidebar');
+            sidebar.innerHTML = `
+            <h2>Library info</h2>
+            <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
+            `;
+
+            this.makePieChart();  
+
+            this.sibebarDocumentation();     
+            this.sidebarContact();   
+
+        },
+        sibebarDocumentation(){
+            var div = document.createElement('div');
+            div.className = 'documentation';
+            div.innerHTML = `
+            <h3>Documentation</h3>
+            <p><a href="#">SHARC Frequently Asked Questions</a> (PDF)</p>
+            <p><a href="#">How SHARC Is Built</a> (PDF)</p>
+            `;
+            document.querySelector('#sidebar').append(div);
+        },
+        sidebarContact(){
+             var div = document.createElement('div');
+            div.className = 'contact-us';
+          div.innerHTML = `
+            <h3>Questions? Get in touch</h3>
+              <form method="POST" action="http://formspree.io/john@osterman.io" _lpchecked="1">
+              <input type="email" name="email" placeholder="Your email">
+              <textarea name="message" placeholder="Your message"></textarea>
+                <input type="text" name="_gotcha" style="display:none">
+                <input type="hidden" name="_next" value="/projects/?thanks">
+              <button type="submit">Send</button>
+            </form>
+          `;  
+          document.querySelector('#sidebar').append(div);
+        },
+        makePieChart(){
+            var svg = d3.select('#sidebar')
+                .append('svg')
+                  .attr('width', '100%')
+                  .attr('xmlns','http://www.w3.org/2000/svg')
+                  .attr('version','1.1')
+                  .attr('viewBox', `0 0 100 62`)
+                  .attr('focusable',false)
+                  .attr('aria-labelledby', `svgTitle svgDesc`)
+                  .attr('role','graphics-dataunit')
+                  .attr('class', 'pubtype-pie');
+
+                svg.append('title')
+                    .attr('id', `svgTitle`)
+                    .text(`Pie chart of publication types`);
+
+                svg.append('desc')
+                    .attr('id',`svgDesc`)
+                    .text(`Pie chart of publication types`);
+
+            var radius = 30;
+            var g = svg.append('g')
+                .attr('transform', `translate(${radius},${radius})`);
+
+            var pieSegments = 5;
+
+
+            var rollup = d3.nest().key(d => d.data.itemType).rollup(v => v.length).entries(model.zoteroItems.filter(d => d.data.itemType !== 'attachment')).sort((a,b) => d3.descending(a.value, b.value));
+            var totalNumber = rollup.reduce((acc,cur) => acc + cur.value, 0);
+
+            var pieData = [];
+            rollup.forEach((d, i) => {
+                if ( i < pieSegments - 1 ){
+                    pieData.push( {
+                                            name: d.key,
+                                            value: d.value
+                                        });
+                } else if ( i === pieSegments - 1 ){
+                    let combinedValue = rollup.slice(i).reduce((acc, cur) => acc + cur.value,0);
+                    pieData.push( {
+                                            name: 'other',
+                                            value: combinedValue
+                                        });
+                } 
+            });
+            console.log(pieData);
+            var pie = d3.pie().sort(null).value(d => d.value);
+
+            var path = d3.arc()
+                .outerRadius(radius)
+                .innerRadius(radius / 1.5 );
+
+            var label = d3.arc()
+                .outerRadius(radius * .85)
+                .innerRadius( radius * .85 );
+           
+             var arc = g.selectAll('.arc')
+                .data(pie(pieData))
+                .enter().append('g')
+                  .attr('class', d => {
+                    console.log(d);
+                    return 'arc ' + d.data.name;
+                });
+
+
+
+              arc.append('path')
+                  .attr('d', path);
+
+             arc.append('text')
+              .attr('transform', d => 'translate(' + label.centroid(d) + ')')
+              .attr('dy', '0.35em')
+              .attr('text-anchor', 'middle')
+              .attr('font-size', 4)
+              .attr('fill', d => {
+                if (d.data.name === 'journalArticle' || d.data.name === 'book' || d.data.name === 'report'){
+                    return '#ffffff';
+                } else {
+                    return '#000000';
+                }
+              })
+              .text(d => d.data.value);
+
+            var pubTypes = {
+                journalArticle: 'journal articles',
+                report: 'reports',
+                webpage: 'webpages',
+                book: 'books',
+                other: 'other'
+            }
+            var legendItems = svg.append('g')
+                .attr('class','legend')
+                .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)')
+                .selectAll('.legend-item')
+                .data(pie(pieData))
+                .enter().append('g')
+                .attr('class', d => 'legend-item ' + d.data.name)
+                .attr('transform', (d,i) => 'translate(0,' + i * 7 + ')');
+
+                legendItems
+                    .append('rect')
+                    //.attr('class', d => d.data.name)
+                    .attr('width', 5)
+                    .attr('height', 5);
+
+                legendItems
+                    .append('text')
+                    .attr('transform', 'translate(7,4)')
+                    .attr('font-size', 4)
+                    .text(d => pubTypes[d.data.name]);
+
+            svg.append('text')
+                .attr('transform', `translate(${radius},${radius})`)
+                .text(totalNumber)
+                .attr('font-size', 10)
+                .attr('text-anchor', 'middle');
+
+
+          
         },
         loading(isLoading){
             if ( isLoading ){

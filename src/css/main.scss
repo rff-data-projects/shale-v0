@@ -61,3 +61,42 @@ h1, h2, h3, h4, h5, h6 {
         } 
     }
 }
+#sidebar h2 {
+  margin-top: 0;
+}
+
+.pubtype-pie {
+  
+    .journalArticle {
+      path, rect {
+        fill: $blue;
+      }
+    }
+    .report {
+      path, rect {
+        fill: $green;
+      }
+    }
+    .webpage {
+      path, rect {  
+        fill: $gold;
+      }
+    }
+    .attachment {
+      path, rect {
+        fill: $light_blue;
+      }
+    }
+    .book {
+      path, rect {
+        fill: $red;
+      }
+    }
+    .other {
+      path, rect {
+        fill: #bbb;
+      }
+
+    }
+  
+}
