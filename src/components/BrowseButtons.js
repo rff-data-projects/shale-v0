@@ -38,7 +38,7 @@ export const createBrowseCategory = function(category, index, isCategorized){
     console.log(styles,childrenClasses);
     var parent = document.createElement('div');
     parent.innerHTML = `
-    <div title="not loaded" data-collection="${collection.key}" class="button button--${ isCategorized ? 'secondary' : 'tertiary'} ${ childrenClasses.reduce((acc,cur) => acc + styles[cur] + ' ','')} ${ index === 0 && i === 0 && isCategorized ? 'active' : ''}">
+    <div title="not loaded" data-collection="${collection.key}" class="button button--${ isCategorized ? 'secondary' : 'tertiary'} ${ childrenClasses.reduce((acc,cur) => acc + cur + ' ','')} ${ index === 0 && i === 0 && isCategorized ? 'active' : ''}">
       <span>${collection.data.name}</span>
     </div>`;
 

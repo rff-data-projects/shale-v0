@@ -27,23 +27,23 @@ module.exports = {
     mode: 'production',
     module: {
     	rules: [
-	       	{
+	       /*	{
 	        	test: /\.scss$/,
 	        	exclude: /main\.scss/,
 	         	use: [scssSharedLoaders[0], 
 	         		{
 						loader: 'css-loader',
 						options: {
-							//modules: true,
-							//localIdentName: '[name]_[local]',
+							modules: true,
+							localIdentName: '[name]_[local]',
 							sourceMap: true,
 							minimize: true,
 							importLoaders: 1		
 						}
 					},
 					...scssSharedLoaders.slice(1)]
-	        }, {
-	        	test: /main\.scss/, // the html refering to classes in main.scss is hard-coded in the index.ejs template
+	        }, */{
+	        	test: /\.scss$/, // the html refering to classes in main.scss is hard-coded in the index.ejs template
 	        						// and therefore these styles should not be renamed bc the html would no longer match
 	         	use: [scssSharedLoaders[0],
 	         		{
