@@ -2,6 +2,7 @@
 
 var CACHE_NAME = 'sharc-cache-v1';
 var urlsToCache = ['/', '/js/index.js', '/css/styles.css'];
+console.log(urlsToCache);
 //HT: heavily: https://developers.google.com/web/fundamentals/primers/service-workers/
 self.addEventListener('install', function (event) {
   console.log(event);

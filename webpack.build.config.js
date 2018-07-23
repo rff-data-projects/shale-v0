@@ -72,7 +72,7 @@ module.exports = {
      	]
    },
     plugins: [
-    	new CleanWebpackPlugin(['dist']),
+    	new CleanWebpackPlugin(['docs']),
     	new HtmlWebpackPlugin({
     		title: 'Shale Research Clearinghouse',
     		inject: false,
@@ -99,6 +99,6 @@ module.exports = {
     ],
   	output: {
     	filename: '[name].js',
-    	path: path.resolve(__dirname, 'dist')
+    	path: path.resolve(__dirname, 'docs')
   	}
 };

@@ -25,7 +25,7 @@ module.exports = {
     },
     devtool: 'inline-source-map', // may be too slow an option; set to another if so
     devServer: {
-  		contentBase: './dist',
+  		contentBase: './docs',
   		hot: true
     },
     mode: 'development',
@@ -77,7 +77,7 @@ module.exports = {
      	]
    },
     plugins: [
-    	new CleanWebpackPlugin(['dist']),
+    	new CleanWebpackPlugin(['docs']),
     	new HtmlWebpackPlugin({
     		title: 'Shale Research Clearinghouse',
     		inject: false,
