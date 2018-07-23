@@ -85,9 +85,17 @@ module.exports = {
 	      chunkFilename: "[id].css",
 	    }),
         new CopyWebpackPlugin([{
-            from: 'data/*.*',
-            context: 'src'
-        }])
+                from: 'data/*.*',
+                context: 'src'
+            },
+            {
+                from: 'assets/*.*',
+                context: 'src'
+            },
+            {
+                from: 'RFF/**/*.*',
+                context: 'src'
+            }])
     ],
   	output: {
     	filename: '[name].js',
