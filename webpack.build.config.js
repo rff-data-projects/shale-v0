@@ -72,7 +72,7 @@ module.exports = {
      	]
    },
     plugins: [
-    	new CleanWebpackPlugin(['docs']),
+    	new CleanWebpackPlugin(['dist']),
     	new HtmlWebpackPlugin({
     		title: 'Shale Research Clearinghouse',
     		inject: false,
@@ -95,10 +95,14 @@ module.exports = {
             {
                 from: 'RFF/**/*.*',
                 context: 'src'
-            }])
+        }]),
+        new webpack.NormalModuleReplacementPlugin(
+          /utils\/sw-dev\.js/,
+          './sw-prod.js'
+        )
     ],
   	output: {
     	filename: '[name].js',
-    	path: path.resolve(__dirname, 'docs')
+    	path: path.resolve(__dirname, 'dist')
   	}
 };

@@ -1,4 +1,4 @@
-import swURL from "file-loader?name=sw.js!babel-loader!./sw";
+import swURL from "file-loader?name=sw-dev.js!babel-loader!./sw-dev";
 // HT: https://michalzalecki.com/progressive-web-apps-with-webpack/ 
 /* Using file-loader to obtain swURL is a hack which allows for using Babel loader
 (and any other loader) for sw.js without adding sw.js as webpack’s entry point. */ 
