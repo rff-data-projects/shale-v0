@@ -4,15 +4,19 @@ import tooltips from './data/tooltips.csv';
 import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
+import SWHandler from './utils/service-worker-handler.js';
    
 (function(){     
 /* global d3 */
 "use strict";  
     const groupId = '2127948';
     var controller = { 
-        gateCheck: 0,
+        gateCheck: 0, 
         searchType: 'fields',
         init(useLocal){ // pass in true to bypass API and use local data
+
+            SWHandler.init();
+
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
             });
