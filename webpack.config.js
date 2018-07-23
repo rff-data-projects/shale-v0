@@ -96,7 +96,11 @@ module.exports = {
             {
                 from: 'assets/*.*',
                 context: 'src'
-        }]),
+            },
+            {
+                from: 'RFF/**/*.*',
+                context: 'src'
+            }]),
     	new webpack.HotModuleReplacementPlugin()
     ],
   	output: {
