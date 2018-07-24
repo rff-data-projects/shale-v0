@@ -1,13 +1,6 @@
 var CACHE_NAME = 'sharc-cache-v1';
-var urlsToCache = [
-  '/',
-  '/js/index.js',
-  '/css/styles.css',
-  '/RFF/modules/system/system.base.css',
-  '/RFF/sites/all/themes/rff_theme/css/styles.css'
-];
+var urlsToCache = ['/','/js/index.js','/css/styles.css', '/RFF/modules/system/system.base.css', '/RFF/sites/all/themes/rff_theme/css/styles.css'];
 console.log(urlsToCache);
-//HT: heavily: https://developers.google.com/web/fundamentals/primers/service-workers/
 self.addEventListener('install', function(event) {
  console.log(event);
   // Perform install steps
@@ -22,13 +15,15 @@ self.addEventListener('install', function(event) {
 
 self.addEventListener('fetch', function(event) {
   event.respondWith(
+    
     caches.match(event.request)
       .then(function(response) {
         // Cache hit - return response
         if (response) {
+          console.log('cache hit ', response);
           return response;
         }
-
+        console.log('not cached ', event.request);
         // IMPORTANT: Clone the request. A request is a stream and
         // can only be consumed once. Since we are consuming this
         // once by cache and once by the browser for fetch, we need
@@ -38,10 +33,11 @@ self.addEventListener('fetch', function(event) {
         return fetch(fetchRequest).then(
           function(response) {
             // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            if(!response || ( response.status !== 200 && response.status !== 0 )) { // || response.type !== 'basic'
+              console.log(response);
               return response;
             }
-
+            console.log('fetched response ', response);
             // IMPORTANT: Clone the response. A response is a stream
             // and because we want the browser to consume the response
             // as well as the cache consuming the response, we need
