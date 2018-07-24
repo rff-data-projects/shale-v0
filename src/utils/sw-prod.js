@@ -4,8 +4,8 @@ var urlsToCache = [
   path,
   path + 'js/index.js',
   path + 'css/styles.css',
-  path + '/RFF/modules/system/system.base.css',
-  path + '/RFF/sites/all/themes/rff_theme/css/styles.css'
+  path + 'RFF/modules/system/system.base.css',
+  path + 'RFF/sites/all/themes/rff_theme/css/styles.css'
 ];
 console.log(urlsToCache);
 self.addEventListener('install', function(event) {
