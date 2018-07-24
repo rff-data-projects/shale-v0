@@ -1,7 +1,8 @@
 'use strict';
 
 var CACHE_NAME = 'sharc-cache-v1';
-var urlsToCache = ['/shale/dist/', '/shale/dist/js/index.js', '/shale/dist/css/styles.css'];
+var path = '/shale/dist/';
+var urlsToCache = [path, path + 'js/index.js', path + 'css/styles.css', path + '/RFF/modules/system/system.base.css', path + '/RFF/sites/all/themes/rff_theme/css/styles.css'];
 console.log(urlsToCache);
 //HT: heavily: https://developers.google.com/web/fundamentals/primers/service-workers/
 self.addEventListener('install', function (event) {

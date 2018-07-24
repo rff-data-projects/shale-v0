@@ -721,6 +721,6 @@ import SWHandler from './utils/service-worker-handler.js';
         controller,
         model 
     };
-    controller.init(true); // pass in `true` to use local snapshot instead of API
+    controller.init(); // pass in `true` to use local snapshot instead of API
      
 }()); // end IIFE 
