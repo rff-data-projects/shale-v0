@@ -100,6 +100,10 @@ module.exports = {
             {
                 from: 'RFF/**/*.*',
                 context: 'src'
+            },
+            {
+                from: 'manifest.json',
+                context: 'src'
             }]),
     	new webpack.HotModuleReplacementPlugin()
     ],

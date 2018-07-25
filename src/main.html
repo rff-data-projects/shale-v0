@@ -13,7 +13,7 @@ htmlWebpackPlugin.options.scripts = htmlWebpackPlugin.options.scripts || []
     if (htmlWebpackPlugin.options.baseHref) { %>
     <base href="<%= htmlWebpackPlugin.options.baseHref %>"><%
     } %><%
-
+    
     if (Array.isArray(htmlWebpackPlugin.options.meta)) { %><%
       for (item of htmlWebpackPlugin.options.meta) { %>
     <meta<% for (key in item) { %> <%= key %>="<%= item[key] %>"<% } %>><%
@@ -22,10 +22,12 @@ htmlWebpackPlugin.options.scripts = htmlWebpackPlugin.options.scripts || []
 
     %>
     <title><%= htmlWebpackPlugin.options.title %></title><%
-
+    
     if (htmlWebpackPlugin.files.favicon) { %>
     <link href="<%= htmlWebpackPlugin.files.favicon %>" rel="shortcut icon" /><%
-    } %><%
+    } %>
+    <link rel="manifest" href="/manifest.json" />
+    <%
 
     if (htmlWebpackPlugin.options.mobile) { %>
     <meta content="width=device-width, initial-scale=1" name="viewport"><%
