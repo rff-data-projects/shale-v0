@@ -7,9 +7,9 @@
 }
 
 .synthesis-results li {
-    border: 1px solid lightgray;
+    border: 2px solid $blue !important;
     padding: 10px;
-    border-radius: 15px;
+    border-radius: 5px;
     width: 45%;
     min-width:250px;
     flex-grow:1;
@@ -19,9 +19,7 @@
 .results {
     min-height: 300px;
 }
-.synthesis-results {
-    border: 2px solid $blue;
-}
+
 .results, .synthesis-results {
     width: 100%;
 
@@ -213,7 +211,7 @@
 .item-info {
     .RFF & {
         padding-left: 30px;
-        background: url(/assets/logo.svg) no-repeat;
+        background: url('/assets/logo.svg') no-repeat;
     }
 }
 
