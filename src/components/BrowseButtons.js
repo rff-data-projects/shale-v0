@@ -51,6 +51,7 @@ export const createBrowseCategory = function(category, index, isCategorized){
       d3.select(this)
         .classed('active', true);
       RFFApp.controller.getCollectionItems(collection.data.key);
+      RFFApp.controller.clearSearch();
     };
     
     return browseButton; 

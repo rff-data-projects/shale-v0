@@ -27,6 +27,12 @@ import smoothscroll from 'smoothscroll-polyfill';
             console.log(tooltips);
             
         },
+        clearSearch(){
+            var input = document.querySelector('#collection-search input');
+            input.value = '';
+            input.setAttribute('placeholder', 'Search the collection (by title, author, or year)');
+
+        },
         setupSearch(){
             document.getElementById('collection-search').onsubmit = function(e){
                 e.preventDefault();
@@ -46,16 +52,17 @@ import smoothscroll from 'smoothscroll-polyfill';
                 promise.then(v => {
                     console.log(v);
                     if (v[0] !== ''){
-                        controller.getSearchItems(v);
+                        controller.getSearchItems(v, input);
                         view.loading(false);
                     }
                 });
             };
         },
-        getSearchItems(keys){
+        getSearchItems(keys, input) {
             var searchItems = model.zoteroItems.filter(item => keys.indexOf(item.key) !== -1 );
             console.log(searchItems);
             filterResults.call(view, searchItems, controller);
+            view.updatePieChart(searchItems, 'matching search: "' + input + '"')
         },
        
         childrenify(data){
@@ -756,6 +763,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                         .classed('active', true);
                     filterResults.call(view, undefined, controller);
                     view.filterSynthesisResults.call(view,[]);
+                    view.updatePieChart(model.zoteroItems, 'All topics');
                 });
             showAll     
                 .append('span')
