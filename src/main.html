@@ -1,10 +1,11 @@
+<!DOCTYPE html>
 <% var item, key %><%
 htmlWebpackPlugin.options.appMountIds = htmlWebpackPlugin.options.appMountIds || [] %><%
 htmlWebpackPlugin.options.lang = htmlWebpackPlugin.options.lang || "en" %><%
 htmlWebpackPlugin.options.links = htmlWebpackPlugin.options.links || [] %><%
 htmlWebpackPlugin.options.meta = htmlWebpackPlugin.options.meta || [] %><%
 htmlWebpackPlugin.options.scripts = htmlWebpackPlugin.options.scripts || []
-%><!DOCTYPE html>
+%>
 <html lang="<%= htmlWebpackPlugin.options.lang %>"<% if (htmlWebpackPlugin.files.manifest) { %> manifest="<%= htmlWebpackPlugin.files.manifest %>"<% } %>>
   <head>
     <meta charset="utf-8">

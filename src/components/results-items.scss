@@ -19,7 +19,9 @@
 .results {
     min-height: 300px;
 }
-
+.synthesis-results {
+    border: 2px solid $blue;
+}
 .results, .synthesis-results {
     width: 100%;
 

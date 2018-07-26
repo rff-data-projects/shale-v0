@@ -1,11 +1,16 @@
 var CACHE_NAME = 'sharc-cache-v1';
-var path = '/shale/dist/';
+var path = '/shale/dist';
 var urlsToCache = [
-  path,
-  path + 'js/index.js',
-  path + 'css/styles.css',
-  path + 'RFF/modules/system/system.base.css',
-  path + 'RFF/sites/all/themes/rff_theme/css/styles.css'
+  path + '/',
+  path + '/manifest.json',
+  path + '/assets/icon-192.png',
+  path + '/assets/icon-512.png',
+  path + '/assets/logo.svg',
+  path + '/assets/spinner.svg',
+  path + '/js/index.js',
+  path + '/css/styles.css',
+  path + '/RFF/modules/system/system.base.css',
+  path + '/RFF/sites/all/themes/rff_theme/css/styles.css'
 ];
 console.log(urlsToCache);
 self.addEventListener('install', function(event) {

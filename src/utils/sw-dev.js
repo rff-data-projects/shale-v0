@@ -1,11 +1,27 @@
-var CACHE_NAME = 'sharc-cache-v1';
-var urlsToCache = ['/','/js/index.js','/css/styles.css', '/RFF/modules/system/system.base.css', '/RFF/sites/all/themes/rff_theme/css/styles.css'];
+var cacheNames = {
+  app: 'sharc-cache-v1',
+  data: 'sharc-data-v1',
+  fonts: 'sharc-fonts-v1',
+  external: 'sharc-external-v1'
+};
+var urlsToCache = [
+  '/',
+  '/manifest.json',
+  '/js/index.js',
+  '/css/styles.css',
+  '/assets/icon-192.png',
+  '/assets/icon-512.png',
+  '/assets/logo.svg',
+  '/assets/spinner.svg',
+  '/RFF/modules/system/system.base.css',
+  '/RFF/sites/all/themes/rff_theme/css/styles.css'
+];
 console.log(urlsToCache);
 self.addEventListener('install', function(event) {
  console.log(event);
   // Perform install steps
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(cacheNames.app)
       .then(function(cache) {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
@@ -43,8 +59,16 @@ self.addEventListener('fetch', function(event) {
             // as well as the cache consuming the response, we need
             // to clone it so we have two streams.
             var responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
+            var whichCache;
+            if ( response.url.indexOf('/fonts/') !== -1 ){
+              whichCache = cacheNames.fonts;
+            } else if ( response.url.indexOf('api.zotero') !== -1 ){
+              console.log(response);
+              whichCache = cacheNames.data;
+            } else {
+              whichCache = cacheNames.external;
+            }
+            caches.open(whichCache)
               .then(function(cache) {
                 cache.put(event.request, responseToCache);
               });

@@ -4,7 +4,8 @@ import tooltips from './data/tooltips.csv';
 import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
-import SWHandler from './utils/service-worker-handler.js';
+import smoothscroll from 'smoothscroll-polyfill';
+//import SWHandler from './utils/service-worker-handler.js';
    
 (function(){     
 /* global d3 */
@@ -15,7 +16,7 @@ import SWHandler from './utils/service-worker-handler.js';
         searchType: 'fields',
         init(useLocal){ // pass in true to bypass API and use local data
 
-            SWHandler.init();
+            //SWHandler.init();
 
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
@@ -127,7 +128,7 @@ import SWHandler from './utils/service-worker-handler.js';
 
             
             if ( useLocal ){
-                d3.json('data/zoteroCollections-7-16-18.json', (error,data) => {
+                d3.json('data/zoteroCollections-7-25-18.json', (error,data) => {
                     if ( error ) {
                         throw error;
                     }
@@ -139,16 +140,28 @@ import SWHandler from './utils/service-worker-handler.js';
                 return;
             }
             var promise = new Promise((resolve,reject) => {
-                d3.json('https://api.zotero.org/groups/' + groupId + '/collections?limit=100', (error,data) => {
-                    if (error) {
-                        reject(error);
-                        throw error;
-                    }
-                    console.log(JSON.stringify(data));
-                    model.collections = this.childrenify(data);
-                   // model.collections = this.recursiveNest(data, [d => d.data.parentCollection, d => d.data.parentCollection]);
-                    resolve(model.collections); 
-                });
+                var attempt = 0;
+                function tryRequest(){
+                    d3.json('https://api.zotero.org/groups/' + groupId + '/collections?limit=100', (error,data) => {
+                        console.log(data);
+                        if (error) {
+                            if ( attempt < 3 ){
+                                console.log('Error, attempt ' + attempt + ': ', error);
+                                attempt++;
+                                tryRequest();
+                            } else {
+                                reject(error);
+                                throw error;
+                            }
+                        } else {
+                            console.log(JSON.stringify(data));
+                            model.collections = this.childrenify(data);
+                           // model.collections = this.recursiveNest(data, [d => d.data.parentCollection, d => d.data.parentCollection]);
+                            resolve(model.collections); 
+                        }
+                    });
+                }
+                tryRequest.call(this);
             });
             promise.then(data => {  
                 console.log(data);
@@ -162,7 +175,7 @@ import SWHandler from './utils/service-worker-handler.js';
         getZoteroItems(useLocal){   
 
             if ( useLocal ){
-                d3.json('data/zoteroItems-7-16-18.json', (error,data) => {
+                d3.json('data/zoteroItems-7-25-18.json', (error,data) => {
                     if ( error ) {
                         throw error;
                     }
@@ -177,32 +190,44 @@ import SWHandler from './utils/service-worker-handler.js';
 
             var initialItemsPromises = [],
                 subsequentItemsPromises = [],
-                initialMax = 9; // last known number of times the API must be hit to get all results. 100 returned at a time,
+                initialMax = 9, // last known number of times the API must be hit to get all results. 100 returned at a time,
                                 // so 3 would get up to 300 hundred. time of coding total was 284; when the toal increases
                                 // the code below will make addition API calls
+                throttle = 500; // ms by which to delay successive api calls to avoid 500 error (?)
             
             function constructPromise(i){
                 var promise = new Promise((resolve,reject) => { // using d3.request instead of .json to have access to the 
                                                                 // response headers. 'Total-Results', in partucular
-                    d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
-                        if (error) {
-                            reject(error);
-                            throw error;
-                        }
-                        console.log(+xhr.getResponseHeader('last-modified-version'));
-                        //model.lastModifiedVersion = model.lastModifiedVersion || +xhr.getResponseHeader('last-modified-version');
-                        resolve({
-                            total: +xhr.getResponseHeader('Total-Results'), // + operand coerces to number
-                            data: JSON.parse(xhr.responseText)
-                        }); 
-                        
-                    });
+                    var attempt = 0;
+                    function tryRequest(){
+                        d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
+                            if (error) {
+                                if ( attempt < 3 ){
+                                    console.log('Error, attempt ' + attempt + ': ', error);
+                                    attempt++;
+                                    tryRequest();
+                                } else {
+                                    // TO DO: WHAT TO DO WHEN THERE'S AN ERROR ?
+                                    reject(error);
+                                    throw error;
+                                }
+                            } else {
+                                console.log(+xhr.getResponseHeader('last-modified-version'));
+                                //model.lastModifiedVersion = model.lastModifiedVersion || +xhr.getResponseHeader('last-modified-version');
+                                resolve({
+                                    total: +xhr.getResponseHeader('Total-Results'), // + operand coerces to number
+                                    data: JSON.parse(xhr.responseText)
+                                }); 
+                            }
+                        });
+                    }
+                    tryRequest();
                 });
                 return promise;     
             }
 
             for ( let i = 0; i < initialMax; i++ ){
-                initialItemsPromises.push(constructPromise(i));
+                setTimeout(initialItemsPromises.push(constructPromise(i)), i * throttle);
             }
             Promise.race(initialItemsPromises).then(value => {
                 console.log(value);
@@ -212,7 +237,6 @@ import SWHandler from './utils/service-worker-handler.js';
                     }
                     Promise.all([...initialItemsPromises,...subsequentItemsPromises]).then((values) => {
                         window.dateStrings = [];
-                        console.log(values);
                         values.forEach(value => { 
                             //console.log(value.data.date);
                             model.zoteroItems.push(...value.data);
@@ -265,6 +289,8 @@ import SWHandler from './utils/service-worker-handler.js';
             createResultsContainer.call(view);
             filterResults.call(view, collectionItems, controller);
             view.filterSynthesisResults(synthesisItems);
+            view.updatePieChart(collectionItems);
+
             /*var promise = new Promise((resolve,reject) => {
                 d3.text('https://api.zotero.org/groups/' + groupId + '/collections/' + collectionKey + '/items?format=keys', (error,text) => {
                     if (error) {
@@ -443,6 +469,7 @@ import SWHandler from './utils/service-worker-handler.js';
     
     var view = { 
         init(){
+            smoothscroll.polyfill();
             console.log(controller.gateCheck);
             if ( controller.gateCheck < 2 ){
                 //console.log('return');
@@ -453,11 +480,19 @@ import SWHandler from './utils/service-worker-handler.js';
             this.renderTopicButtons();
             this.attachTooltips();
             console.log(model.collections);
-            var initialCategory = document.querySelector('.browse-buttons div.active').dataset.collection;
+            var initialCategory = document.querySelector('.browse-buttons div').dataset.collection;
             controller.getCollectionItems(initialCategory);
+            // two lines above leftovers from when list loaded with first category
+            // the next two lines to list all pubs weren't working without them
+            // being called first
+            filterResults.call(view, undefined, controller);
+            view.filterSynthesisResults.call(view,[]);
             this.setupSidebar();
             this.loading(false);
            
+        },
+        smoothScroll(elem){
+            elem.scrollIntoView({ behavior: 'smooth' })
         },
         attachTooltips(){
             document.querySelectorAll('.browse-buttons > div').forEach(btn => {
@@ -515,7 +550,7 @@ import SWHandler from './utils/service-worker-handler.js';
              var div = document.createElement('div');
             div.className = 'contact-us';
           div.innerHTML = `
-            <h3>Questions? Get in touch</h3>
+            <h3>Get in touch</h3>
               <form><!--<form method="POST" action="http://formspree.io/XXXXXXX" _lpchecked="1">-->
               <input type="email" name="email" placeholder="Your email">
               <textarea name="message" placeholder="Your message"></textarea>
@@ -546,16 +581,28 @@ import SWHandler from './utils/service-worker-handler.js';
                     .attr('id',`svgDesc`)
                     .text(`Pie chart of publication types`);
 
+            svg.append('g');
+
+            d3.select('#sidebar svg').append('g')
+                .attr('class','legend');
+                
+            d3.select('#sidebar svg').append('text')
+                .attr('class', 'total')
+                
+                .attr('font-size', 10)
+                .attr('text-anchor', 'middle');
+                
+            this.updatePieChart(model.zoteroItems);
+        },
+
+        updatePieChart(items){
+            console.log(items);
+            //var t = d3.transition().duration(250);
+            
             var radius = 30;
-            var g = svg.append('g')
-                .attr('transform', `translate(${radius},${radius})`);
-
             var pieSegments = 5;
-
-
-            var rollup = d3.nest().key(d => d.data.itemType).rollup(v => v.length).entries(model.zoteroItems.filter(d => d.data.itemType !== 'attachment')).sort((a,b) => d3.descending(a.value, b.value));
+            var rollup = d3.nest().key(d => d.data.itemType).rollup(v => v.length).entries(items.filter(d => d.data.itemType !== 'attachment')).sort((a,b) => d3.descending(a.value, b.value));
             var totalNumber = rollup.reduce((acc,cur) => acc + cur.value, 0);
-
             var pieData = [];
             rollup.forEach((d, i) => {
                 if ( i < pieSegments - 1 ){
@@ -573,7 +620,7 @@ import SWHandler from './utils/service-worker-handler.js';
             });
             console.log(pieData);
             var pie = d3.pie().sort(null).value(d => d.value);
-
+            console.log(pie(pieData));
             var path = d3.arc()
                 .outerRadius(radius)
                 .innerRadius(radius / 1.5 );
@@ -581,21 +628,38 @@ import SWHandler from './utils/service-worker-handler.js';
             var label = d3.arc()
                 .outerRadius(radius * .85)
                 .innerRadius( radius * .85 );
+
+            var g = d3.select('#sidebar svg g')
+                .attr('transform', `translate(${radius},${radius})`);
            
-             var arc = g.selectAll('.arc')
-                .data(pie(pieData))
-                .enter().append('g')
-                  .attr('class', d => {
+            var arc = g.selectAll('.arc')
+                .data(pie(pieData), d => d.data.name);
+
+            /* UPDATE EXISTING */               
+            arc.select('path')
+                .attr('d', path);
+            arc.select('text')
+                .attr('transform', d => 'translate(' + label.centroid(d) + ')')
+                .text(d => d.data.value);
+
+            /* REMOVE EXITING */
+            arc.exit()
+               // .attr('class', 'exit')
+                .remove();
+            
+            /* ADD ENTERING */
+
+            var entering = arc.enter().append('g')
+                .attr('class', d => {
                     console.log(d);
                     return 'arc ' + d.data.name;
                 });
 
-
-
-              arc.append('path')
+            entering
+                .append('path')
                   .attr('d', path);
 
-             arc.append('text')
+             entering.append('text')
               .attr('transform', d => 'translate(' + label.centroid(d) + ')')
               .attr('dy', '0.35em')
               .attr('text-anchor', 'middle')
@@ -614,34 +678,44 @@ import SWHandler from './utils/service-worker-handler.js';
                 report: 'reports',
                 webpage: 'webpages',
                 book: 'books',
-                other: 'other'
+                other: 'other',
+                bookSection: 'chapters',
+                document: 'documents',
+                magazineArticle: 'magazine articles'
             }
-            var legendItems = svg.append('g')
-                .attr('class','legend')
-                .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)')
+
+            var legend = d3.select('#sidebar svg g.legend')
+                .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)');
+            
+            var legendItems = legend
                 .selectAll('.legend-item')
-                .data(pie(pieData))
+                .data(pie(pieData), d => d.data.name);
+
+            legendItems.select('g.legend-item')
+                .attr('transform', (d,i) => 'translate(0,' + i * 7 + ')');
+
+            legendItems.exit().remove();
+
+            var enteringL = legendItems
                 .enter().append('g')
                 .attr('class', d => 'legend-item ' + d.data.name)
                 .attr('transform', (d,i) => 'translate(0,' + i * 7 + ')');
 
-                legendItems
+                enteringL
                     .append('rect')
                     //.attr('class', d => d.data.name)
                     .attr('width', 5)
                     .attr('height', 5);
 
-                legendItems
+                enteringL
                     .append('text')
                     .attr('transform', 'translate(7,4)')
                     .attr('font-size', 4)
                     .text(d => pubTypes[d.data.name]);
 
-            svg.append('text')
+            d3.select('#sidebar svg text.total')
                 .attr('transform', `translate(${radius},${radius})`)
-                .text(totalNumber)
-                .attr('font-size', 10)
-                .attr('text-anchor', 'middle');
+                .text(totalNumber);
 
 
           
@@ -670,7 +744,7 @@ import SWHandler from './utils/service-worker-handler.js';
         renderShowAllButton(){
             var showAll = d3.select('.browse-buttons.uncategorized')  // should be in the view module
                 .append('div')
-                .classed('button button--tertiary show-all',true)
+                .classed('button button--tertiary show-all active',true)
                 .on('click', function(){
                     d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
                                                              // do the same thing
@@ -721,6 +795,6 @@ import SWHandler from './utils/service-worker-handler.js';
         controller,
         model 
     };
-    controller.init(); // pass in `true` to use local snapshot instead of API
+    controller.init(true); // pass in `true` to use local snapshot instead of API
      
 }()); // end IIFE 

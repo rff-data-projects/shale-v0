@@ -1,7 +1,7 @@
 @import 'variables.scss';
 
 /* Overides not necessary on production */
-
+/*
 html {
 	font-family: calluna, "Calluna W01",Georgia,"Times New Roman","DejaVu Serif",serif;
 }
@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5, h6 {
 #mfPreviewBar {
 	display: none;
 }
-
+*/
 /* end*/
 
 /* end main */
@@ -92,11 +92,27 @@ h1, h2, h3, h4, h5, h6 {
         fill: $red;
       }
     }
+    .bookSection {
+      path, rect {
+        fill: lighten($red, 10%);
+      }
+    }
+    .document {
+      path, rect {
+        fill: lighten(#bbb, 10%);
+      }
+    }
     .other {
       path, rect {
         fill: #bbb;
       }
-
     }
+    .magazineArticle {
+      path, rect {
+        fill: lighten($blue, 10%);
+      }
+    }
+
+    
   
 }
