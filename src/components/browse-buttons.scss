@@ -12,6 +12,12 @@
     border: 2px solid #fff;
     background: $light_blue;
 }
+#browse-buttons-container {
+    h3 {
+        margin-top: 1em;
+    }
+    
+}
 
 .browse-buttons {
     display: flex; 
@@ -36,8 +42,12 @@
             border: 1px solid $blue;
         }
         &.active {
-            background: $blue;
-            color:#fff;
+            border: 1px dotted $blue;
+        }
+        &:hover {
+            border: 1px dotted $blue;
+            background-color: $light_blue;
+            color: $blue;   
         }
     }
 
@@ -67,7 +77,7 @@
 
 #topic-key {
     margin-left: 10px;
-    margin-bottom: 1em;
+    //margin-bottom: 1em;
     div {
         padding: 0 17px;
         position: relative;

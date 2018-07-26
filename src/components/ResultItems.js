@@ -143,7 +143,7 @@ export const createResultItem = function(d){
 
 /* ******** */
 
-export const filterResults = function(matches, controller){
+export const filterResults = function(matches, controller, key){
   /* global d3 */
   console.log('list-item', matches);
     var filteredData = matches === undefined ? window.RFFApp.model.zoteroItems : matches; 
@@ -190,7 +190,9 @@ export const filterResults = function(matches, controller){
 
      controller.biblioTooltips();
 
-     this.smoothScroll(document.querySelector('.synthesis-results'));
+     if ( key !== 'initial' ){
+        this.smoothScroll(document.querySelector('.synthesis-results'));
+    }
 
 
 }; 

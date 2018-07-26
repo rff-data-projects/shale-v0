@@ -279,12 +279,14 @@ import smoothscroll from 'smoothscroll-polyfill';
       },
         getCollectionItems(collectionKey){
             console.log(collectionKey);
-            var collection = model.collections.find(c => c.key === collectionKey );
-            console.log(collection);
-            var collectionItems = model.zoteroItems.filter(z => z.data.collections.indexOf(collectionKey) !== -1);
-            console.log(collectionItems);
+            var collection;
             var synthesisItems = []; 
-            if ( collection.children ) {
+            if ( collectionKey !== 'initial' ){
+                collection = model.collections.find(c => c.key === collectionKey );
+            }
+            var collectionItems = collectionKey !== 'initial' ? model.zoteroItems.filter(z => z.data.collections.indexOf(collectionKey) !== -1 ) : model.zoteroItems;
+            console.log(collectionItems);
+            if ( collection !== undefined && collection.children ) {
                 collection.children.forEach(child => { // to do make more DRY
                     var matches = model.zoteroItems.filter(z => z.data.collections.indexOf(child.key) !== -1);
                     matches.forEach(match => {
@@ -294,9 +296,9 @@ import smoothscroll from 'smoothscroll-polyfill';
                 });
             }
             createResultsContainer.call(view);
-            filterResults.call(view, collectionItems, controller);
+            filterResults.call(view, collectionItems, controller, collectionKey);
             view.filterSynthesisResults(synthesisItems);
-            view.updatePieChart(collectionItems, collection.data.name);
+            view.updatePieChart(collectionItems, (collection !== undefined ? collection.data.name : 'All topics' ));
 
             /*var promise = new Promise((resolve,reject) => {
                 d3.text('https://api.zotero.org/groups/' + groupId + '/collections/' + collectionKey + '/items?format=keys', (error,text) => {
@@ -487,13 +489,13 @@ import smoothscroll from 'smoothscroll-polyfill';
             this.renderTopicButtons();
             this.attachTooltips();
             console.log(model.collections);
-            var initialCategory = document.querySelector('.browse-buttons div').dataset.collection;
-            controller.getCollectionItems(initialCategory);
+            //var initialCategory = document.querySelector('.browse-buttons div').dataset.collection;
+            controller.getCollectionItems('initial');
             // two lines above leftovers from when list loaded with first category
             // the next two lines to list all pubs weren't working without them
             // being called first
-            filterResults.call(view, undefined, controller);
-            view.filterSynthesisResults.call(view,[]);
+            //filterResults.call(view, undefined, controller);
+            //view.filterSynthesisResults.call(view,[]);
             this.setupSidebar();
             this.loading(false);
            
@@ -749,14 +751,25 @@ import smoothscroll from 'smoothscroll-polyfill';
                 section.appendChild(createBrowseCategory(d,i,false));
             });
             window.RFFApp.model.resolveTopicButtons(true);
+            createTopicKey();
             this.renderShowAllButton();
+            this.renderShowAllSyntheses();
         },
         renderShowAllButton(){
-            var showAll = d3.select('.browse-buttons.uncategorized')  // should be in the view module
-                .append('div')
-                .classed('button button--tertiary show-all active',true)
+            var div = document.createElement('div');
+            div.id = 'show-all-container';
+            div.className = 'browse-buttons';
+
+            var btn = document.createElement('div');
+            btn.className = 'button button--secondary show-all active';
+            div.appendChild(btn);
+
+            document.querySelector('#browse-buttons-container').insertAdjacentHTML('afterbegin', div.outerHTML);
+            var showAll = d3.select('div.show-all');
+
+            showAll
                 .on('click', function(){
-                    d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                     d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
                                                              // do the same thing
                         .classed('active', false);
                     d3.select(this)
@@ -765,11 +778,34 @@ import smoothscroll from 'smoothscroll-polyfill';
                     view.filterSynthesisResults.call(view,[]);
                     view.updatePieChart(model.zoteroItems, 'All topics');
                     controller.clearSearch();
+                    
                 });
             showAll     
                 .append('span')
-                .text('Show all');
-            createTopicKey();
+                .text('Show full collection');
+            
+        },
+        renderShowAllSyntheses(){
+            
+            var showAll = d3.select('#show-all-container')
+                .append('div')
+                .attr('class', 'button button--secondary show-syntheses');
+            showAll
+                .on('click', function(){
+                   d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                                                             // do the same thing
+                        .classed('active', false);
+                    d3.select(this)
+                        .classed('active', true);
+                    filterResults.call(view, undefined, controller);
+                    view.filterSynthesisResults.call(view,[]);
+                    view.updatePieChart(model.zoteroItems, 'Curated reviews');
+                    controller.clearSearch();
+                });
+            showAll     
+                .append('span')
+                .text('Show curated reviews');
+            
         },
 
         filterSynthesisResults(matches){ // needs to be more DRY re: code above
