@@ -289,7 +289,7 @@ import smoothscroll from 'smoothscroll-polyfill';
             createResultsContainer.call(view);
             filterResults.call(view, collectionItems, controller);
             view.filterSynthesisResults(synthesisItems);
-            view.updatePieChart(collectionItems);
+            view.updatePieChart(collectionItems, collection.data.name);
 
             /*var promise = new Promise((resolve,reject) => {
                 d3.text('https://api.zotero.org/groups/' + groupId + '/collections/' + collectionKey + '/items?format=keys', (error,text) => {
@@ -530,10 +530,9 @@ import smoothscroll from 'smoothscroll-polyfill';
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
 
-            this.makePieChart();  
-
-            this.sibebarDocumentation();     
             this.sidebarContact();   
+            this.sibebarDocumentation();     
+            this.makePieChart();  
 
         },
         sibebarDocumentation(){
@@ -562,7 +561,7 @@ import smoothscroll from 'smoothscroll-polyfill';
           document.querySelector('#sidebar').append(div);
         },
         makePieChart(){
-            var svg = d3.select('#sidebar')
+            var svg = d3.select('#sidebar2')
                 .append('svg')
                   .attr('width', '100%')
                   .attr('xmlns','http://www.w3.org/2000/svg')
@@ -583,19 +582,22 @@ import smoothscroll from 'smoothscroll-polyfill';
 
             svg.append('g');
 
-            d3.select('#sidebar svg').append('g')
+            d3.select('#sidebar2 svg').append('g')
                 .attr('class','legend');
                 
-            d3.select('#sidebar svg').append('text')
+            d3.select('#sidebar2 svg').append('text')
                 .attr('class', 'total')
                 
                 .attr('font-size', 10)
                 .attr('text-anchor', 'middle');
                 
-            this.updatePieChart(model.zoteroItems);
+            this.updatePieChart(model.zoteroItems, 'All topics');
         },
 
-        updatePieChart(items){
+        updatePieChart(items, topic){
+
+            d3.select('#sidebar2 #pie-header')
+                .text(topic);
             console.log(items);
             //var t = d3.transition().duration(250);
             
@@ -629,7 +631,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                 .outerRadius(radius * .85)
                 .innerRadius( radius * .85 );
 
-            var g = d3.select('#sidebar svg g')
+            var g = d3.select('#sidebar2 svg g')
                 .attr('transform', `translate(${radius},${radius})`);
            
             var arc = g.selectAll('.arc')
@@ -681,10 +683,11 @@ import smoothscroll from 'smoothscroll-polyfill';
                 other: 'other',
                 bookSection: 'chapters',
                 document: 'documents',
-                magazineArticle: 'magazine articles'
+                magazineArticle: 'magazine articles',
+                presentation: 'presentations'
             }
 
-            var legend = d3.select('#sidebar svg g.legend')
+            var legend = d3.select('#sidebar2 svg g.legend')
                 .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)');
             
             var legendItems = legend
@@ -713,7 +716,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                     .attr('font-size', 4)
                     .text(d => pubTypes[d.data.name]);
 
-            d3.select('#sidebar svg text.total')
+            d3.select('#sidebar2 svg text.total')
                 .attr('transform', `translate(${radius},${radius})`)
                 .text(totalNumber);
 
