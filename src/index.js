@@ -764,6 +764,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                     filterResults.call(view, undefined, controller);
                     view.filterSynthesisResults.call(view,[]);
                     view.updatePieChart(model.zoteroItems, 'All topics');
+                    controller.clearSearch();
                 });
             showAll     
                 .append('span')
