@@ -64,5 +64,5 @@ export const createTopicKey = function(){
                   <div class="issue-brief">= issue brief and literature review available</div>
                   <div>= issue brief and literature review still to come</div>
               </div>`;
-  cont.insertAdjacentHTML('beforeend', html);
+  cont.insertAdjacentHTML('afterbegin', html);
 }

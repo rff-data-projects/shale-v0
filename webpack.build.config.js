@@ -69,6 +69,7 @@ module.exports = {
                     skipEmptyLines: true
                 }
             }
+            
      	]
    },
     plugins: [
@@ -77,6 +78,7 @@ module.exports = {
     		title: 'Shale Research Clearinghouse',
     		inject: false,
 		    template: './src/index.ejs',
+            baseHref: 'sharc/dist/'
 		}),
      	new MiniCssExtractPlugin({
 	      // Options similar to the same options in webpackOptions.output

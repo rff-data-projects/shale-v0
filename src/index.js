@@ -278,25 +278,32 @@ import smoothscroll from 'smoothscroll-polyfill';
             model.zoteroItems.sort((a,b) => d3.descending(a.data.dateValue, b.data.dateValue)); 
       },
         getCollectionItems(collectionKey){
+            console.log('In get collection Items');
             console.log(collectionKey);
-            var collection = model.collections.find(c => c.key === collectionKey );
-            console.log(collection);
-            var collectionItems = model.zoteroItems.filter(z => z.data.collections.indexOf(collectionKey) !== -1);
-            console.log(collectionItems);
+            var collections = [];
             var synthesisItems = []; 
-            if ( collection.children ) {
-                collection.children.forEach(child => { // to do make more DRY
-                    var matches = model.zoteroItems.filter(z => z.data.collections.indexOf(child.key) !== -1);
-                    matches.forEach(match => {
-                        match.synthesisType = child.data.name;
-                    });
-                    synthesisItems.push(...matches);
-                });
+            if ( collectionKey !== 'initial' ){
+                collections = collectionKey !== 'syntheses-only' ? [model.collections.find(c => c.key === collectionKey )] : model.collections;
             }
+            var collectionItems = collectionKey === 'initial' ? model.zoteroItems : collectionKey === 'syntheses-only' ? [] : model.zoteroItems.filter(z => z.data.collections.indexOf(collectionKey) !== -1 );
+            console.log(collectionItems);
+            collections.forEach(collection => {
+                if ( collection !== undefined && collection.children ) {
+                    collection.children.forEach(child => { // to do make more DRY
+                        var matches = model.zoteroItems.filter(z => ( z.data.collections.indexOf(child.key) !== -1 && ( child.data.name === 'Literature Review' || child.data.name === 'Issue Brief') ));
+
+                        matches.forEach(match => {
+                            console.log(child.data);
+                            match.synthesisType = child.data.name;
+                        });
+                        synthesisItems.push(...matches);
+                    });
+                }
+            });
             createResultsContainer.call(view);
-            filterResults.call(view, collectionItems, controller);
+            filterResults.call(view, collectionItems, controller, collectionKey);
             view.filterSynthesisResults(synthesisItems);
-            view.updatePieChart(collectionItems, collection.data.name);
+            view.updatePieChart(collectionItems, (collections.length === 0 ? 'All topics' : collections.length === 1 ? collections[0].data.name : 'Curated reviews') );
 
             /*var promise = new Promise((resolve,reject) => {
                 d3.text('https://api.zotero.org/groups/' + groupId + '/collections/' + collectionKey + '/items?format=keys', (error,text) => {
@@ -487,13 +494,13 @@ import smoothscroll from 'smoothscroll-polyfill';
             this.renderTopicButtons();
             this.attachTooltips();
             console.log(model.collections);
-            var initialCategory = document.querySelector('.browse-buttons div').dataset.collection;
-            controller.getCollectionItems(initialCategory);
+            //var initialCategory = document.querySelector('.browse-buttons div').dataset.collection;
+            controller.getCollectionItems('initial');
             // two lines above leftovers from when list loaded with first category
             // the next two lines to list all pubs weren't working without them
             // being called first
-            filterResults.call(view, undefined, controller);
-            view.filterSynthesisResults.call(view,[]);
+            //filterResults.call(view, undefined, controller);
+            //view.filterSynthesisResults.call(view,[]);
             this.setupSidebar();
             this.loading(false);
            
@@ -725,7 +732,13 @@ import smoothscroll from 'smoothscroll-polyfill';
 
             d3.select('#sidebar2 svg text.total')
                 .attr('transform', `translate(${radius},${radius})`)
-                .text(totalNumber);
+                .text(() => {
+                    if ( totalNumber > 0 ) {
+                        return totalNumber;
+                    } else {
+                        return null;
+                    }
+                });
 
 
           
@@ -749,14 +762,25 @@ import smoothscroll from 'smoothscroll-polyfill';
                 section.appendChild(createBrowseCategory(d,i,false));
             });
             window.RFFApp.model.resolveTopicButtons(true);
+            createTopicKey();
             this.renderShowAllButton();
+            this.renderShowAllSyntheses();
         },
         renderShowAllButton(){
-            var showAll = d3.select('.browse-buttons.uncategorized')  // should be in the view module
-                .append('div')
-                .classed('button button--tertiary show-all active',true)
+            var div = document.createElement('div');
+            div.id = 'show-all-container';
+            div.className = 'browse-buttons';
+
+            var btn = document.createElement('div');
+            btn.className = 'button button--secondary show-all active';
+            div.appendChild(btn);
+
+            document.querySelector('#browse-buttons-container').insertAdjacentHTML('afterbegin', div.outerHTML);
+            var showAll = d3.select('div.show-all');
+
+            showAll
                 .on('click', function(){
-                    d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                     d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
                                                              // do the same thing
                         .classed('active', false);
                     d3.select(this)
@@ -765,11 +789,35 @@ import smoothscroll from 'smoothscroll-polyfill';
                     view.filterSynthesisResults.call(view,[]);
                     view.updatePieChart(model.zoteroItems, 'All topics');
                     controller.clearSearch();
+                    
                 });
             showAll     
                 .append('span')
-                .text('Show all');
-            createTopicKey();
+                .text('Show full collection');
+            
+        },
+        renderShowAllSyntheses(){
+            
+            var showAll = d3.select('#show-all-container')
+                .append('div')
+                .attr('class', 'button button--secondary show-syntheses');
+            showAll
+                .on('click', function(){
+                   d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                                                             // do the same thing
+                        .classed('active', false);
+                    d3.select(this)
+                        .classed('active', true);
+                    controller.getCollectionItems('syntheses-only');
+                    //filterResults.call(view, 'none', controller);
+                    //view.filterSynthesisResults.call(view,[]);
+                    //view.updatePieChart(model.zoteroItems, 'Curated reviews');
+                    controller.clearSearch();
+                });
+            showAll     
+                .append('span')
+                .text('Show curated reviews');
+            
         },
 
         filterSynthesisResults(matches){ // needs to be more DRY re: code above
