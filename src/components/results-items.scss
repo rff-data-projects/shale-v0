@@ -1,13 +1,8 @@
 @import '../css/variables.scss';
 
 .loading .loadable {
-<<<<<<< HEAD
-    background: url(/sharc/dist/assets/spinner.svg) no-repeat;
-||||||| merged common ancestors
+
     background: url(../assets/spinner.svg) no-repeat;
-=======
-    background: url(/assets/spinner.svg) no-repeat;
->>>>>>> dev
     background-size: 40px;
 
 }
