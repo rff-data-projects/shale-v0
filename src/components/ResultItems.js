@@ -146,7 +146,7 @@ export const createResultItem = function(d){
 export const filterResults = function(matches, controller, key){
   /* global d3 */
   console.log('list-item', matches);
-    var filteredData = matches === undefined ? window.RFFApp.model.zoteroItems : matches; 
+    var filteredData = matches === undefined ? window.RFFApp.model.zoteroItems : matches === 'none' ? [] : matches; 
     console.log(filteredData);
     var items = d3.select(this.results).selectAll('.' + 'list-item')
         .data(filteredData, d => d.key);

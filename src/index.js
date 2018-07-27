@@ -278,27 +278,32 @@ import smoothscroll from 'smoothscroll-polyfill';
             model.zoteroItems.sort((a,b) => d3.descending(a.data.dateValue, b.data.dateValue)); 
       },
         getCollectionItems(collectionKey){
+            console.log('In get collection Items');
             console.log(collectionKey);
-            var collection;
+            var collections = [];
             var synthesisItems = []; 
             if ( collectionKey !== 'initial' ){
-                collection = model.collections.find(c => c.key === collectionKey );
+                collections = collectionKey !== 'syntheses-only' ? [model.collections.find(c => c.key === collectionKey )] : model.collections;
             }
-            var collectionItems = collectionKey !== 'initial' ? model.zoteroItems.filter(z => z.data.collections.indexOf(collectionKey) !== -1 ) : model.zoteroItems;
+            var collectionItems = collectionKey === 'initial' ? model.zoteroItems : collectionKey === 'syntheses-only' ? [] : model.zoteroItems.filter(z => z.data.collections.indexOf(collectionKey) !== -1 );
             console.log(collectionItems);
-            if ( collection !== undefined && collection.children ) {
-                collection.children.forEach(child => { // to do make more DRY
-                    var matches = model.zoteroItems.filter(z => z.data.collections.indexOf(child.key) !== -1);
-                    matches.forEach(match => {
-                        match.synthesisType = child.data.name;
+            collections.forEach(collection => {
+                if ( collection !== undefined && collection.children ) {
+                    collection.children.forEach(child => { // to do make more DRY
+                        var matches = model.zoteroItems.filter(z => ( z.data.collections.indexOf(child.key) !== -1 && ( child.data.name === 'Literature Review' || child.data.name === 'Issue Brief') ));
+
+                        matches.forEach(match => {
+                            console.log(child.data);
+                            match.synthesisType = child.data.name;
+                        });
+                        synthesisItems.push(...matches);
                     });
-                    synthesisItems.push(...matches);
-                });
-            }
+                }
+            });
             createResultsContainer.call(view);
             filterResults.call(view, collectionItems, controller, collectionKey);
             view.filterSynthesisResults(synthesisItems);
-            view.updatePieChart(collectionItems, (collection !== undefined ? collection.data.name : 'All topics' ));
+            view.updatePieChart(collectionItems, (collections.length === 0 ? 'All topics' : collections.length === 1 ? collections[0].data.name : 'Curated reviews') );
 
             /*var promise = new Promise((resolve,reject) => {
                 d3.text('https://api.zotero.org/groups/' + groupId + '/collections/' + collectionKey + '/items?format=keys', (error,text) => {
@@ -727,7 +732,13 @@ import smoothscroll from 'smoothscroll-polyfill';
 
             d3.select('#sidebar2 svg text.total')
                 .attr('transform', `translate(${radius},${radius})`)
-                .text(totalNumber);
+                .text(() => {
+                    if ( totalNumber > 0 ) {
+                        return totalNumber;
+                    } else {
+                        return null;
+                    }
+                });
 
 
           
@@ -797,9 +808,10 @@ import smoothscroll from 'smoothscroll-polyfill';
                         .classed('active', false);
                     d3.select(this)
                         .classed('active', true);
-                    filterResults.call(view, undefined, controller);
-                    view.filterSynthesisResults.call(view,[]);
-                    view.updatePieChart(model.zoteroItems, 'Curated reviews');
+                    controller.getCollectionItems('syntheses-only');
+                    //filterResults.call(view, 'none', controller);
+                    //view.filterSynthesisResults.call(view,[]);
+                    //view.updatePieChart(model.zoteroItems, 'Curated reviews');
                     controller.clearSearch();
                 });
             showAll     
