@@ -68,8 +68,16 @@ module.exports = {
                     header: true,
                     skipEmptyLines: true
                 }
-            }
-            
+            },
+            {
+                test: /\.(png|jpg|gif|svg)$/,
+                use: [
+                  {
+                    loader: 'file-loader',
+                    options: {}
+                  }
+                ]
+              }
      	]
    },
     plugins: [
@@ -78,7 +86,7 @@ module.exports = {
     		title: 'Shale Research Clearinghouse',
     		inject: false,
 		    template: './src/index.ejs',
-            baseHref: 'sharc/dist/'
+           // baseHref: 'sharc/dist/'
 		}),
      	new MiniCssExtractPlugin({
 	      // Options similar to the same options in webpackOptions.output
