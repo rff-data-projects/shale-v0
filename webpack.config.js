@@ -74,6 +74,7 @@ module.exports = {
                     skipEmptyLines: true
                 }
             }
+            
      	]
    },
     plugins: [
