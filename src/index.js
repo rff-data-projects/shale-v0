@@ -539,10 +539,12 @@ import smoothscroll from 'smoothscroll-polyfill';
             var lastModifiedDate = d3.max(model.zoteroItems, d => new Date(d.data.dateModified));
             var version = d3.max(model.zoteroItems, d => d.data.version);
             var sidebar = document.querySelector('#sidebar');
-            sidebar.innerHTML = `
+            var html = `
             <h2>Library info</h2>
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
+
+            sidebar.insertAdjacentHTML('beforeend', html);
 
             this.sidebarContact();   
             this.sibebarDocumentation();     
@@ -554,8 +556,8 @@ import smoothscroll from 'smoothscroll-polyfill';
             div.className = 'documentation';
             div.innerHTML = `
             <h3>Documentation</h3>
-            <p><a href="#">SHARC Frequently Asked Questions</a> (PDF)</p>
-            <p><a href="#">How SHARC Is Built</a> (PDF)</p>
+            <p><a href="http://www.rff.org/files/faq.pdf">SHARC Frequently Asked Questions</a> (PDF)</p>
+            <p><a href="http://www.rff.org/files/how-sharc-is-built.pdf">How SHARC Is Built</a> (PDF)</p>
             `;
             document.querySelector('#sidebar').append(div);
         },

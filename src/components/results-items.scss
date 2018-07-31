@@ -1,8 +1,7 @@
 @import '../css/variables.scss';
 
 .loading .loadable {
-
-    background: url(../assets/spinner.svg) no-repeat;
+    background: url(./../assets/spinner.svg) no-repeat;
     background-size: 40px;
 
 }
@@ -223,11 +222,25 @@
 
 
 }
+.synthesis-results {
+    position: relative;
+    &:before {
+        content: 'sorted newest to oldest';
+        font-size: 0.8em;
+        color: $a11y_gray;
+        position: absolute;
+        bottom: -13px;
+        right: 0;
 
+    }
+}
+.results ul {
+        padding-top:0;
+    }
 .item-info {
     .RFF & {
         padding-left: 30px;
-        background: url('../assets/logo.svg') no-repeat;
+        background: url('./../assets/logo.svg') no-repeat;
     }
 }
 
