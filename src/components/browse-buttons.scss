@@ -58,10 +58,6 @@
     div {
         padding: 0 17px;
         position: relative;
-
-        &::after, &::before {
-            left: 0;
-            top: calc(50% - 7px) !important;
-        }
+        background: url(./../assets/checkmark.svg) no-repeat;        
     }
 }

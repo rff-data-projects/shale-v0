@@ -61,8 +61,7 @@ export const createBrowseCategory = function(category, index, isCategorized){
 export const createTopicKey = function(){
   var cont = document.getElementById('browse-buttons-container');
   var html = `<div id="topic-key">
-                  <div class="issue-brief">= issue brief and literature review available</div>
-                  <div>= issue brief and literature review still to come</div>
+                  <div class="${styles.keyMark}">= issue brief and/or literature review available</div>
               </div>`;
   cont.insertAdjacentHTML('afterbegin', html);
 }
