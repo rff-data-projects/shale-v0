@@ -4,12 +4,17 @@ console.log(styles);
 export const createBrowseCategory = function(category, index, isCategorized){
   /* global d3, RFFApp */
   var categoryDiv = document.createElement('div');
+  console.log(index, isCategorized);
+  if (index === 0 && isCategorized){
+    var heading = document.createElement('h2');
+    heading.id='browse-heading';
+    heading.innerHTML = 'Browse by topic';
+    categoryDiv.appendChild(heading)
+  }
   var container;
   
   if ( isCategorized ){
-    categoryDiv.innerHTML = `
-      <h3>${category.data.name}</h3>
-    `;
+    categoryDiv.insertAdjacentHTML('beforeend', `<h3>${category.data.name}</h3>`);
     container = document.createElement('div');
     container.className = 'browse-buttons';
     category.children.sort((a,b) => d3.ascending(a.data.name, b.data.name)).forEach((d,i) => {
@@ -59,9 +64,9 @@ export const createBrowseCategory = function(category, index, isCategorized){
 }
 
 export const createTopicKey = function(){
-  var cont = document.getElementById('browse-buttons-container');
+  var cont = document.getElementById('browse-heading');
   var html = `<div id="topic-key">
                   <div class="${styles.keyMark}">= issue brief and/or literature review available</div>
               </div>`;
-  cont.insertAdjacentHTML('afterbegin', html);
+  cont.insertAdjacentHTML('afterend', html);
 }
