@@ -30,7 +30,7 @@ import smoothscroll from 'smoothscroll-polyfill';
         clearSearch(){
             var input = document.querySelector('#collection-search input');
             input.value = '';
-            input.setAttribute('placeholder', 'Search the collection (by title, author, or year)');
+            input.setAttribute('placeholder', 'Search by title, author, or year');
 
         },
         setupSearch(){
