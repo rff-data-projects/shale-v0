@@ -1,17 +1,5 @@
 @import '../css/variables.scss';
 
-@mixin topicDot() {
-    content: '';
-    display: block;
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 10px;
-    height: 10px;
-    border-radius:7px;
-    border: 2px solid #fff;
-    background: $light_blue;
-}
 #browse-buttons-container {
     h3 {
         margin-top: 1em;
@@ -32,13 +20,18 @@
         font-size: 15px;
         line-height: 120%;
         position: relative;
+        background-repeat: no-repeat;
+        background-position: 98% 2%;
+        &.issue-brief, &.literature-review {
+            background-image: url('./../assets/checkmark.svg');
+        }
         span {
             top: 2px;
             position: relative;
         }
         &.button--tertiary {
             color: $blue;
-            background: #fff;
+            background-color: #fff;
             border: 1px solid $blue;
         }
         &.active {
@@ -49,27 +42,11 @@
             background-color: $light_blue;
             color: $blue;   
         }
+
     }
 
 }
 
-
-.browse-buttons:not(.uncategorized) .button, #topic-key div {
-    
-    &::before {
-        @include topicDot();
-    }
-
-    &.show-all::before {
-        display: none;
-    }
-    
-    &.literature-review::before, &.issue-brief::before {
-        
-        background: $blue;  
-    }
-    
-}
 
 .browse-buttons.uncategorized {
     margin-top:1.5625em;
