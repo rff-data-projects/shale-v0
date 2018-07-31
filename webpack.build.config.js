@@ -70,13 +70,29 @@ module.exports = {
                 }
             },
             {
-                test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
+                // images under limit converted to data url. above the limit falls back to file-loader to emit file
+                // as specified in options (options are passed to file-loader)
+                test: /\.(png|jp(e?)g|gif)$/,
                 loader: 'url-loader',
                 options: {
-                  limit: 10000
+                    limit: 10 * 1024,
+                    name: '[name].[ext]?[hash]',
+                    outputPath: 'images/',
+                    publicPath: '/shale-v0/dist/images/'
                 }
-              }
-            
+            },
+            {
+                // SVGs under limit converted to data url. svg-url-loader converts to utf-8 instead of hex, shorter for human-readable code.
+                // above the limit falls back to file-loader to emit file as specified in options (options are passed to file-loader)
+                test: /\.svg$/,
+                loader: 'svg-url-loader',
+                options: {
+                    limit: 10 * 1024,
+                    name: '[name].[ext]?[hash]',
+                    outputPath: 'images/',
+                    publicPath: '/shale-v0/dist/images/'
+                }
+            },
      	]
    },
     plugins: [
@@ -84,8 +100,7 @@ module.exports = {
     	new HtmlWebpackPlugin({
     		title: 'Shale Research Clearinghouse',
     		inject: false,
-		    template: './src/index.ejs',
-            baseHref: 'sharc/dist/'
+		    template: './src/index.ejs'
 		}),
      	new MiniCssExtractPlugin({
 	      // Options similar to the same options in webpackOptions.output
@@ -98,7 +113,7 @@ module.exports = {
                 context: 'src'
             },
             {
-                from: 'assets/*.*',
+                from: 'assets/icon*.*',
                 context: 'src'
             },
             {
