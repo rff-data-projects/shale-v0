@@ -14,12 +14,16 @@ export const createBrowseCategory = function(category, index, isCategorized){
   var container;
   
   if ( isCategorized ){
-    categoryDiv.insertAdjacentHTML('beforeend', `<h3>${category.data.name}</h3>`);
+    let div = document.createElement('div');
+    div.className = `category-group ${category.data.name.replace(/ /g,'-').toLowerCase()}`;
+    div.insertAdjacentHTML('beforeend', `<h3>${category.data.name}</h3>`);
     container = document.createElement('div');
     container.className = 'browse-buttons';
     category.children.sort((a,b) => d3.ascending(a.data.name, b.data.name)).forEach((d,i) => {
       container.appendChild(createBrowseButton(d,i));
     });
+    div.appendChild(container);
+    container = div;
   } else {
     container = document.querySelector('.browse-buttons.uncategorized') || document.createElement('div');
     container.className = 'browse-buttons uncategorized';

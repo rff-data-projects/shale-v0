@@ -2,11 +2,17 @@
 
 #browse-buttons-container {
     h3 {
-        margin-top: 1em;
+        margin-top: 0;
+        margin-left: 10px;
     }
     
 }
 
+.category-group {
+    padding: 10px;
+    margin-top: 20px;
+    background: #E7E8E9;
+}
 .browse-buttons {
     display: flex; 
     flex-wrap: wrap;
