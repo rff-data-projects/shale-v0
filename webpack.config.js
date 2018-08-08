@@ -104,7 +104,7 @@ module.exports = {
     	new HtmlWebpackPlugin({
     		title: 'Shale Research Clearinghouse',
     		inject: false,
-		    template: './src/index.ejs',
+		    template: './src/index.html',
 		}),
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output

@@ -5,6 +5,10 @@ import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
 import smoothscroll from 'smoothscroll-polyfill';
+import zoteroCollections from './data/zoteroCollections-7-25-18.json';
+import zoteroItems from './data/zoteroItems-7-25-18.json';
+
+
 //import SWHandler from './utils/service-worker-handler.js';
    
 (function(){     
@@ -135,15 +139,10 @@ import smoothscroll from 'smoothscroll-polyfill';
 
             
             if ( useLocal ){
-                d3.json('data/zoteroCollections-7-25-18.json', (error,data) => {
-                    if ( error ) {
-                        throw error;
-                    }
-                    model.collections = this.childrenify(data);
-                    console.log('increment gateCheck from get collections');
-                    this.gateCheck++;
-                    view.init();
-                });
+                model.collections = this.childrenify(zoteroCollections);
+                console.log('increment gateCheck from get collections');
+                this.gateCheck++;
+                view.init();
                 return;
             }
             var promise = new Promise((resolve,reject) => {
@@ -182,16 +181,11 @@ import smoothscroll from 'smoothscroll-polyfill';
         getZoteroItems(useLocal){   
 
             if ( useLocal ){
-                d3.json('data/zoteroItems-7-25-18.json', (error,data) => {
-                    if ( error ) {
-                        throw error;
-                    }
-                    model.zoteroItems = data;
-                    this.parseZoteroItemDates();
-                    console.log('increment gateCheck from get items');
-                    this.gateCheck++;
-                    view.init();
-                });
+                model.zoteroItems = zoteroItems;
+                this.parseZoteroItemDates();
+                console.log('increment gateCheck from get items');
+                this.gateCheck++;
+                view.init();
                 return;
             }
 
