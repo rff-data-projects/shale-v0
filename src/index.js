@@ -840,10 +840,8 @@ import searchHTML from 'html-loader!./components/form.html';
                 .classed('RFF', true)
                 .classed('entering', true)
                 .classed('list-item', true)
-                .html(d => createResultItem(d))
-                .on('click', function(){
-                    window.open('./pdf/' + this.id + '.pdf', '_blank');
-                });
+                .html(d => createResultItem(d));
+                
 
             setTimeout(function(){
                 entering.classed('entering',false);    

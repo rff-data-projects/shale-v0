@@ -49,6 +49,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(#fff, 0.9);
   border: 2px solid $blue;
   color: $dark_gray;
+  overflow: hidden;
 }
 
 #search-type {
@@ -64,6 +65,10 @@ h1, h2, h3, h4, h5, h6 {
 
 
 .pubtype-pie {
+
+    .loading & {
+      opacity: 0.3;
+    }
   
     .journalArticle {
       path, rect {
@@ -125,4 +130,7 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   overflow-y: auto;
   max-height: 100vh;
+  .loading & {
+    background: url('./../assets/spinner.svg') 100% 25px / 35px no-repeat;
+  }
 }
