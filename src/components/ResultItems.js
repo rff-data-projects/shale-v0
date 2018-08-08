@@ -3,7 +3,8 @@ console.log(styles);
 /* ******** */
 
 export const createResultsContainer = function(){
-  var html = `<div class="synthesis-results">
+  var html = `<div class="no-results-message"></div>
+             <div class="synthesis-results">
                   <ul class="flex space-between"></ul>
               </div>
               <div class="results">

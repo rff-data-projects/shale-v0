@@ -34,10 +34,14 @@ import searchHTML from 'html-loader!./components/form.html';
         clearSearch(){
             var input = document.querySelector('#collection-search input');
             input.value = '';
-            input.setAttribute('placeholder', 'Search the collection (by title, author, or year)');
-
+            input.setAttribute('placeholder', 'Search by title, author, or year');
+            this.clearSearchMessage();
         },
-        
+        clearSearchMessage(){
+            document.querySelectorAll('.no-results-message').forEach(msg => {
+                msg.innerHTML = '';
+            });
+        },
         getSearchItems(keys, input) {
             var searchItems = model.zoteroItems.filter(item => keys.indexOf(item.key) !== -1 );
             console.log(searchItems);
@@ -450,7 +454,14 @@ import searchHTML from 'html-loader!./components/form.html';
                 document.querySelector('body').classList.remove('loading');
             }
         },  
-
+        noSearchResults(term){
+            this.clearSearch();
+            document.querySelectorAll('.no-results-message').forEach(msg => {
+                msg.innerHTML = `No results for "${term}"`;
+            });
+           
+               
+        }
 
     }; 
  
@@ -543,16 +554,20 @@ import searchHTML from 'html-loader!./components/form.html';
                                 reject(error);
                                 throw error;
                             }
-                            
-                            resolve(data.split(/\n/)); 
+                            var splitData = data.split(/\n/) || [data];
+                            console.log(splitData);
+                            resolve(splitData); 
                         });
                     });
                     promise.then(v => {
                         console.log(v);
                         if (v[0] !== ''){
+                            controller.clearSearchMessage();
                             controller.getSearchItems(v, input);
-                            controller.loading(false);
+                        } else {
+                            controller.noSearchResults(input);
                         }
+                        controller.loading(false);
                     });
                 };
             }
