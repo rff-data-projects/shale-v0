@@ -442,7 +442,14 @@ import searchHTML from 'html-loader!./components/form.html';
             console.log('Oops, unable to copy');
           }
 
-        }  
+        },
+        loading(isLoading){
+            if ( isLoading ){
+                document.querySelector('body').classList.add('loading');
+            } else {
+                document.querySelector('body').classList.remove('loading');
+            }
+        },  
 
 
     }; 
@@ -472,7 +479,7 @@ import searchHTML from 'html-loader!./components/form.html';
             //filterResults.call(view, undefined, controller);
             //view.filterSynthesisResults.call(view,[]);
             this.setupSidebar();
-            this.loading(false);
+            controller.loading(false);
            
         },
         smoothScroll(elem){
@@ -527,7 +534,7 @@ import searchHTML from 'html-loader!./components/form.html';
             function searchOnRender(){
                 document.getElementById('collection-search').onsubmit = function(e){
                     e.preventDefault();
-                    view.loading(true);
+                    controller.loading(true);
                     var input = this.querySelector('input').value;
                     var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
                     var promise = new Promise((resolve,reject) => {
@@ -544,7 +551,7 @@ import searchHTML from 'html-loader!./components/form.html';
                         console.log(v);
                         if (v[0] !== ''){
                             controller.getSearchItems(v, input);
-                            view.loading(false);
+                            controller.loading(false);
                         }
                     });
                 };
@@ -746,13 +753,7 @@ import searchHTML from 'html-loader!./components/form.html';
 
           
         },
-        loading(isLoading){
-            if ( isLoading ){
-                document.querySelector('body').classList.add('loading');
-            } else {
-                document.querySelector('body').classList.remove('loading');
-            }
-        },
+        
         renderTopicButtons(){
             var section = document.getElementById('browse-buttons-container');
             var categories = model.collections.filter(d => d.data.parentCollection === false).sort((a,b) => d3.ascending(a.data.name, b.data.name));
@@ -770,6 +771,7 @@ import searchHTML from 'html-loader!./components/form.html';
             this.renderShowAllSyntheses();
         },
         renderShowAllButton(){
+
             var div = document.createElement('div');
             div.id = 'show-all-container';
             div.className = 'browse-buttons';
@@ -783,15 +785,19 @@ import searchHTML from 'html-loader!./components/form.html';
 
             showAll
                 .on('click', function(){
-                     d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
-                                                             // do the same thing
-                        .classed('active', false);
-                    d3.select(this)
-                        .classed('active', true);
-                    filterResults.call(view, undefined, controller);
-                    view.filterSynthesisResults.call(view,[]);
-                    view.updatePieChart(model.zoteroItems, 'All topics');
-                    controller.clearSearch();
+                    controller.loading(true);
+                    setTimeout(() => { // setTimeout needed to allow for load to take effect
+                        d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                                                                 // do the same thing
+                            .classed('active', false);
+                        d3.select(this)
+                            .classed('active', true);
+                        filterResults.call(view, undefined, controller);
+                        view.filterSynthesisResults.call(view,[]);
+                        view.updatePieChart(model.zoteroItems, 'All topics');
+                        controller.clearSearch();
+                        controller.loading(false);
+                    });
                     
                 });
             showAll     
@@ -806,16 +812,20 @@ import searchHTML from 'html-loader!./components/form.html';
                 .attr('class', 'button button--secondary show-syntheses');
             showAll
                 .on('click', function(){
-                   d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
-                                                             // do the same thing
-                        .classed('active', false);
-                    d3.select(this)
-                        .classed('active', true);
-                    controller.getCollectionItems('syntheses-only');
-                    //filterResults.call(view, 'none', controller);
-                    //view.filterSynthesisResults.call(view,[]);
-                    //view.updatePieChart(model.zoteroItems, 'Curated reviews');
-                    controller.clearSearch();
+                  controller.loading(true);
+                   setTimeout(() => {
+                       d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                                                                 // do the same thing
+                            .classed('active', false);
+                        d3.select(this)
+                            .classed('active', true);
+                        controller.getCollectionItems('syntheses-only');
+                        //filterResults.call(view, 'none', controller);
+                        //view.filterSynthesisResults.call(view,[]);
+                        //view.updatePieChart(model.zoteroItems, 'Curated reviews');
+                        controller.clearSearch();
+                        controller.loading(false);
+                  });
                 });
             showAll     
                 .append('span')
