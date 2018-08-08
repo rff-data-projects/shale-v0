@@ -115,7 +115,14 @@ h1, h2, h3, h4, h5, h6 {
         fill: lighten($gold, 20%);
       }
     }
+}
+#app-container {
+  display: inline-block;
 
-    
-  
+}
+#sidebar {
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  max-height: 100vh;
 }

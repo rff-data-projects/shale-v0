@@ -2,11 +2,17 @@
 
 #browse-buttons-container {
     h3 {
-        margin-top: 1em;
+        margin-top: 0;
+        margin-left: 10px;
     }
     
 }
 
+.category-group {
+    padding: 10px;
+    margin-top: 20px;
+    background: #E7E8E9;
+}
 .browse-buttons {
     display: flex; 
     flex-wrap: wrap;
@@ -21,9 +27,10 @@
         line-height: 120%;
         position: relative;
         background-repeat: no-repeat;
-        background-position: 98% 2%;
+        background-position: 98% 6%;
+        background-size: 23%;
         &.issue-brief, &.literature-review {
-            background-image: url('./../assets/checkmark.svg');
+            background-image: url('./../assets/shark.svg');
         }
         span {
             top: 2px;
@@ -53,11 +60,11 @@
 }
 
 #topic-key {
-    margin-left: 10px;
-    //margin-bottom: 1em;
+    
     div {
-        padding: 0 17px;
+        padding: 0 35px;
         position: relative;
-        background: url(./../assets/checkmark.svg) no-repeat;        
+        background: url(./../assets/shark.svg) 0 5px / 30px no-repeat;
+
     }
 }

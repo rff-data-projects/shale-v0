@@ -4,6 +4,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const scssSharedLoaders = [{ // defining array of css loaders here to avoid duplication below
 		loader: MiniCssExtractPlugin.loader,
@@ -95,12 +96,26 @@ module.exports = {
             },
      	]
    },
+    optimization: {
+      minimizer: [
+        new UglifyJSPlugin({
+          uglifyOptions: {
+            compress: {
+              drop_console: true
+            },
+            output: {
+              comments: false
+            }
+          },
+        }),
+      ],
+    },
     plugins: [
     	new CleanWebpackPlugin(['dist']),
     	new HtmlWebpackPlugin({
     		title: 'Shale Research Clearinghouse',
     		inject: false,
-		    template: './src/index.ejs'
+		    template: './src/index.html'
 		}),
      	new MiniCssExtractPlugin({
 	      // Options similar to the same options in webpackOptions.output

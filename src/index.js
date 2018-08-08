@@ -5,6 +5,11 @@ import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
 import smoothscroll from 'smoothscroll-polyfill';
+import zoteroCollections from './data/zoteroCollections-7-25-18.json';
+import zoteroItems from './data/zoteroItems-7-25-18.json';
+import searchHTML from 'html-loader!./components/form.html';
+
+
 //import SWHandler from './utils/service-worker-handler.js';
    
 (function(){     
@@ -23,7 +28,6 @@ import smoothscroll from 'smoothscroll-polyfill';
             });
             this.getZoteroCollections(useLocal);
             this.getZoteroItems(useLocal);
-            this.setupSearch();
             console.log(tooltips);
             
         },
@@ -33,31 +37,7 @@ import smoothscroll from 'smoothscroll-polyfill';
             input.setAttribute('placeholder', 'Search by title, author, or year');
 
         },
-        setupSearch(){
-            document.getElementById('collection-search').onsubmit = function(e){
-                e.preventDefault();
-                view.loading(true);
-                var input = this.querySelector('input').value;
-                var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
-                var promise = new Promise((resolve,reject) => {
-                    d3.text(APIString, (error,data) => {
-                        if (error) {
-                            reject(error);
-                            throw error;
-                        }
-                        
-                        resolve(data.split(/\n/)); 
-                    });
-                });
-                promise.then(v => {
-                    console.log(v);
-                    if (v[0] !== ''){
-                        controller.getSearchItems(v, input);
-                        view.loading(false);
-                    }
-                });
-            };
-        },
+        
         getSearchItems(keys, input) {
             var searchItems = model.zoteroItems.filter(item => keys.indexOf(item.key) !== -1 );
             console.log(searchItems);
@@ -135,15 +115,10 @@ import smoothscroll from 'smoothscroll-polyfill';
 
             
             if ( useLocal ){
-                d3.json('data/zoteroCollections-7-25-18.json', (error,data) => {
-                    if ( error ) {
-                        throw error;
-                    }
-                    model.collections = this.childrenify(data);
-                    console.log('increment gateCheck from get collections');
-                    this.gateCheck++;
-                    view.init();
-                });
+                model.collections = this.childrenify(zoteroCollections);
+                console.log('increment gateCheck from get collections');
+                this.gateCheck++;
+                view.init();
                 return;
             }
             var promise = new Promise((resolve,reject) => {
@@ -182,16 +157,11 @@ import smoothscroll from 'smoothscroll-polyfill';
         getZoteroItems(useLocal){   
 
             if ( useLocal ){
-                d3.json('data/zoteroItems-7-25-18.json', (error,data) => {
-                    if ( error ) {
-                        throw error;
-                    }
-                    model.zoteroItems = data;
-                    this.parseZoteroItemDates();
-                    console.log('increment gateCheck from get items');
-                    this.gateCheck++;
-                    view.init();
-                });
+                model.zoteroItems = zoteroItems;
+                this.parseZoteroItemDates();
+                console.log('increment gateCheck from get items');
+                this.gateCheck++;
+                view.init();
                 return;
             }
 
@@ -540,16 +510,45 @@ import smoothscroll from 'smoothscroll-polyfill';
             var version = d3.max(model.zoteroItems, d => d.data.version);
             var sidebar = document.querySelector('#sidebar');
             var html = `
-            <h2>Library info</h2>
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
 
+            this.makePieChart();
             sidebar.insertAdjacentHTML('beforeend', html);
+            this.addSearch();  
 
             this.sidebarContact();   
             this.sibebarDocumentation();     
-            this.makePieChart();  
 
+        },
+        addSearch(){
+            document.querySelector('#sidebar').insertAdjacentHTML('beforeend', searchHTML);
+            searchOnRender();
+            function searchOnRender(){
+                document.getElementById('collection-search').onsubmit = function(e){
+                    e.preventDefault();
+                    view.loading(true);
+                    var input = this.querySelector('input').value;
+                    var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
+                    var promise = new Promise((resolve,reject) => {
+                        d3.text(APIString, (error,data) => {
+                            if (error) {
+                                reject(error);
+                                throw error;
+                            }
+                            
+                            resolve(data.split(/\n/)); 
+                        });
+                    });
+                    promise.then(v => {
+                        console.log(v);
+                        if (v[0] !== ''){
+                            controller.getSearchItems(v, input);
+                            view.loading(false);
+                        }
+                    });
+                };
+            }
         },
         sibebarDocumentation(){
             var div = document.createElement('div');
@@ -577,7 +576,9 @@ import smoothscroll from 'smoothscroll-polyfill';
           document.querySelector('#sidebar').append(div);
         },
         makePieChart(){
-            var svg = d3.select('#sidebar2')
+            document.querySelector('#sidebar').insertAdjacentHTML('beforeend', '<h3>Publications by type</h3><p id="pie-header"></p>');
+            
+            var svg = d3.select('#sidebar')
                 .append('svg')
                   .attr('width', '100%')
                   .attr('xmlns','http://www.w3.org/2000/svg')
@@ -598,10 +599,10 @@ import smoothscroll from 'smoothscroll-polyfill';
 
             svg.append('g');
 
-            d3.select('#sidebar2 svg').append('g')
+            d3.select('#sidebar svg').append('g')
                 .attr('class','legend');
                 
-            d3.select('#sidebar2 svg').append('text')
+            d3.select('#sidebar svg').append('text')
                 .attr('class', 'total')
                 
                 .attr('font-size', 10)
@@ -612,7 +613,7 @@ import smoothscroll from 'smoothscroll-polyfill';
 
         updatePieChart(items, topic){
 
-            d3.select('#sidebar2 #pie-header')
+            d3.select('#sidebar #pie-header')
                 .text(topic);
             console.log(items);
             //var t = d3.transition().duration(250);
@@ -647,7 +648,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                 .outerRadius(radius * .85)
                 .innerRadius( radius * .85 );
 
-            var g = d3.select('#sidebar2 svg g')
+            var g = d3.select('#sidebar svg g')
                 .attr('transform', `translate(${radius},${radius})`);
            
             var arc = g.selectAll('.arc')
@@ -703,7 +704,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                 presentation: 'presentations'
             }
 
-            var legend = d3.select('#sidebar2 svg g.legend')
+            var legend = d3.select('#sidebar svg g.legend')
                 .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)');
             
             var legendItems = legend
@@ -732,7 +733,7 @@ import smoothscroll from 'smoothscroll-polyfill';
                     .attr('font-size', 4)
                     .text(d => pubTypes[d.data.name]);
 
-            d3.select('#sidebar2 svg text.total')
+            d3.select('#sidebar svg text.total')
                 .attr('transform', `translate(${radius},${radius})`)
                 .text(() => {
                     if ( totalNumber > 0 ) {
