@@ -7,6 +7,7 @@ import { createResultsContainer, createResultItem, filterResults } from './compo
 import smoothscroll from 'smoothscroll-polyfill';
 import zoteroCollections from './data/zoteroCollections-7-25-18.json';
 import zoteroItems from './data/zoteroItems-7-25-18.json';
+import searchHTML from 'html-loader!./components/form.html';
 
 
 //import SWHandler from './utils/service-worker-handler.js';
@@ -27,7 +28,6 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
             });
             this.getZoteroCollections(useLocal);
             this.getZoteroItems(useLocal);
-            this.setupSearch();
             console.log(tooltips);
             
         },
@@ -37,31 +37,7 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
             input.setAttribute('placeholder', 'Search the collection (by title, author, or year)');
 
         },
-        setupSearch(){
-            document.getElementById('collection-search').onsubmit = function(e){
-                e.preventDefault();
-                view.loading(true);
-                var input = this.querySelector('input').value;
-                var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
-                var promise = new Promise((resolve,reject) => {
-                    d3.text(APIString, (error,data) => {
-                        if (error) {
-                            reject(error);
-                            throw error;
-                        }
-                        
-                        resolve(data.split(/\n/)); 
-                    });
-                });
-                promise.then(v => {
-                    console.log(v);
-                    if (v[0] !== ''){
-                        controller.getSearchItems(v, input);
-                        view.loading(false);
-                    }
-                });
-            };
-        },
+        
         getSearchItems(keys, input) {
             var searchItems = model.zoteroItems.filter(item => keys.indexOf(item.key) !== -1 );
             console.log(searchItems);
@@ -534,16 +510,45 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
             var version = d3.max(model.zoteroItems, d => d.data.version);
             var sidebar = document.querySelector('#sidebar');
             var html = `
-            <h2>Library info</h2>
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
 
+            this.makePieChart();
             sidebar.insertAdjacentHTML('beforeend', html);
+            this.addSearch();  
 
             this.sidebarContact();   
             this.sibebarDocumentation();     
-            this.makePieChart();  
 
+        },
+        addSearch(){
+            document.querySelector('#sidebar').insertAdjacentHTML('beforeend', searchHTML);
+            searchOnRender();
+            function searchOnRender(){
+                document.getElementById('collection-search').onsubmit = function(e){
+                    e.preventDefault();
+                    view.loading(true);
+                    var input = this.querySelector('input').value;
+                    var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
+                    var promise = new Promise((resolve,reject) => {
+                        d3.text(APIString, (error,data) => {
+                            if (error) {
+                                reject(error);
+                                throw error;
+                            }
+                            
+                            resolve(data.split(/\n/)); 
+                        });
+                    });
+                    promise.then(v => {
+                        console.log(v);
+                        if (v[0] !== ''){
+                            controller.getSearchItems(v, input);
+                            view.loading(false);
+                        }
+                    });
+                };
+            }
         },
         sibebarDocumentation(){
             var div = document.createElement('div');
@@ -571,7 +576,9 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
           document.querySelector('#sidebar').append(div);
         },
         makePieChart(){
-            var svg = d3.select('#sidebar2')
+            document.querySelector('#sidebar').insertAdjacentHTML('beforeend', '<h3>Publications by type</h3><p id="pie-header"></p>');
+            
+            var svg = d3.select('#sidebar')
                 .append('svg')
                   .attr('width', '100%')
                   .attr('xmlns','http://www.w3.org/2000/svg')
@@ -592,10 +599,10 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
 
             svg.append('g');
 
-            d3.select('#sidebar2 svg').append('g')
+            d3.select('#sidebar svg').append('g')
                 .attr('class','legend');
                 
-            d3.select('#sidebar2 svg').append('text')
+            d3.select('#sidebar svg').append('text')
                 .attr('class', 'total')
                 
                 .attr('font-size', 10)
@@ -606,7 +613,7 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
 
         updatePieChart(items, topic){
 
-            d3.select('#sidebar2 #pie-header')
+            d3.select('#sidebar #pie-header')
                 .text(topic);
             console.log(items);
             //var t = d3.transition().duration(250);
@@ -641,7 +648,7 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
                 .outerRadius(radius * .85)
                 .innerRadius( radius * .85 );
 
-            var g = d3.select('#sidebar2 svg g')
+            var g = d3.select('#sidebar svg g')
                 .attr('transform', `translate(${radius},${radius})`);
            
             var arc = g.selectAll('.arc')
@@ -697,7 +704,7 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
                 presentation: 'presentations'
             }
 
-            var legend = d3.select('#sidebar2 svg g.legend')
+            var legend = d3.select('#sidebar svg g.legend')
                 .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)');
             
             var legendItems = legend
@@ -726,7 +733,7 @@ import zoteroItems from './data/zoteroItems-7-25-18.json';
                     .attr('font-size', 4)
                     .text(d => pubTypes[d.data.name]);
 
-            d3.select('#sidebar2 svg text.total')
+            d3.select('#sidebar svg text.total')
                 .attr('transform', `translate(${radius},${radius})`)
                 .text(() => {
                     if ( totalNumber > 0 ) {
