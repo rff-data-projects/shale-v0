@@ -69,6 +69,12 @@ h1, h2, h3, h4, h5, h6 {
     .loading & {
       opacity: 0.3;
     }
+
+    .arc {
+      path, rect {
+        fill: $light_blue;
+      }
+    }
   
     .journalArticle {
       path, rect {
