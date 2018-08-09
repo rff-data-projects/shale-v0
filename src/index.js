@@ -5,8 +5,8 @@ import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
 import smoothscroll from 'smoothscroll-polyfill';
-import zoteroCollections from './data/zoteroCollections-7-25-18.json';
-import zoteroItems from './data/zoteroItems-7-25-18.json';
+import zoteroCollections from './data/zoteroCollections-8-8-18.json';
+import zoteroItems from './data/zoteroItems-8-8-18.json';
 import searchHTML from 'html-loader!./components/form.html';
 
 
@@ -136,12 +136,14 @@ import searchHTML from 'html-loader!./components/form.html';
                                 attempt++;
                                 tryRequest();
                             } else {
+                                controller.fadeInText(document.querySelector('#loading-error'),'There was an error loading collections from Zotero. Please try again.')
                                 reject(error);
                                 throw error;
                             }
                         } else {
                             console.log(JSON.stringify(data));
                             model.collections = this.childrenify(data);
+                            controller.fadeInText(document.querySelector('#loading-status'),'Zotero collections received')
                            // model.collections = this.recursiveNest(data, [d => d.data.parentCollection, d => d.data.parentCollection]);
                             resolve(model.collections); 
                         }
@@ -157,6 +159,23 @@ import searchHTML from 'html-loader!./components/form.html';
                 this.gateCheck++;
                 view.init();
             }); 
+        },
+        fadeOutText(el){
+            el.classList.add('no-opacity');
+        },
+        fadeInText(el,text){
+            return new Promise((resolve) => {
+                var durationStr = window.getComputedStyle(el).getPropertyValue('transition-duration');
+                var duration = parseFloat(durationStr) * 1000;
+                console.log(duration);
+                controller.fadeOutText(el);
+                setTimeout(() => {
+                    el.innerHTML = text;
+                    el.classList.remove('no-opacity');
+                    resolve(true);
+                }, duration);
+            });
+
         }, 
         getZoteroItems(useLocal){   
 
@@ -174,9 +193,10 @@ import searchHTML from 'html-loader!./components/form.html';
                 initialMax = 9, // last known number of times the API must be hit to get all results. 100 returned at a time,
                                 // so 3 would get up to 300 hundred. time of coding total was 284; when the toal increases
                                 // the code below will make addition API calls
-                throttle = 500; // ms by which to delay successive api calls to avoid 500 error (?)
+                throttle = 500, // ms by which to delay successive api calls to avoid 500 error (?)
+                overallIndex = 1;
             
-            function constructPromise(i){
+            function constructPromise(i,overallIndex){
                 var promise = new Promise((resolve,reject) => { // using d3.request instead of .json to have access to the 
                                                                 // response headers. 'Total-Results', in partucular
                     var attempt = 0;
@@ -188,12 +208,13 @@ import searchHTML from 'html-loader!./components/form.html';
                                     attempt++;
                                     tryRequest();
                                 } else {
-                                    // TO DO: WHAT TO DO WHEN THERE'S AN ERROR ?
+                                    controller.fadeInText(document.querySelector('#loading-error'),`There was an error loading items set ${overallIndex} from Zotero. Please try again.`)
                                     reject(error);
                                     throw error;
                                 }
                             } else {
                                 console.log(+xhr.getResponseHeader('last-modified-version'));
+                                controller.fadeInText(document.querySelector('#loading-status'), `Zotero items set ${overallIndex} received`)
                                 //model.lastModifiedVersion = model.lastModifiedVersion || +xhr.getResponseHeader('last-modified-version');
                                 resolve({
                                     total: +xhr.getResponseHeader('Total-Results'), // + operand coerces to number
@@ -208,13 +229,15 @@ import searchHTML from 'html-loader!./components/form.html';
             }
 
             for ( let i = 0; i < initialMax; i++ ){
-                setTimeout(initialItemsPromises.push(constructPromise(i)), i * throttle);
+                setTimeout(initialItemsPromises.push(constructPromise(i, overallIndex)), i * throttle);
+                overallIndex++;
             }
             Promise.race(initialItemsPromises).then(value => {
                 console.log(value);
                 if ( value.total > initialMax ) {
                     for ( let i = initialMax; i < Math.ceil(value.total / 100); i++ ){
-                        subsequentItemsPromises.push(constructPromise(i));
+                        subsequentItemsPromises.push(constructPromise(i, overallIndex));
+                        overallIndex++;
                     }
                     Promise.all([...initialItemsPromises,...subsequentItemsPromises]).then((values) => {
                         window.dateStrings = [];
@@ -477,9 +500,11 @@ import searchHTML from 'html-loader!./components/form.html';
                 //console.log('return');
                 return;
             }
+            setTimeout(() => {
+                controller.fadeInText(document.querySelector('#loading-status'),'Initializing the view');
+            });
             console.log('READY!');
             console.log(model.zoteroItems);
-            this.removeSplash();
             this.renderTopicButtons();
             this.attachTooltips();
             console.log(model.collections);
@@ -490,7 +515,9 @@ import searchHTML from 'html-loader!./components/form.html';
             // being called first
             //filterResults.call(view, undefined, controller);
             //view.filterSynthesisResults.call(view,[]);
+            controller.fadeInText(document.querySelector('#loading-status'),'Almost ready')
             this.setupSidebar();
+            this.removeSplash();
             controller.loading(false);
            
         },
@@ -890,6 +917,6 @@ import searchHTML from 'html-loader!./components/form.html';
         controller,
         model 
     };
-    controller.init(true); // pass in `true` to use local snapshot instead of API
+    controller.init(); // pass in `true` to use local snapshot instead of API
      
 }()); // end IIFE 
