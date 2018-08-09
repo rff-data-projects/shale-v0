@@ -5,11 +5,13 @@ import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
 import smoothscroll from 'smoothscroll-polyfill';
-import zoteroCollections from './data/zoteroCollections-8-8-18.json';
-import zoteroItems from './data/zoteroItems-8-8-18.json';
+//import zoteroCollections from './data/zoteroCollections-8-8-18.json';
+//import zoteroItems from './data/zoteroItems-8-8-18.json';
 import searchHTML from 'html-loader!./components/form.html';
 import loadingPage from 'html-loader!./components/loading-page.html';
 import sharkImageUrl from './assets/shark-animate-sheared.svg';
+import { arrayFind } from './polyfills.js';
+import { NodeListForEach } from './polyfills.js';
 
 
 //import SWHandler from './utils/service-worker-handler.js';
@@ -24,6 +26,7 @@ import sharkImageUrl from './assets/shark-animate-sheared.svg';
         init(useLocal){ // pass in true to bypass API and use local data
 
             //SWHandler.init();
+            this.polyfills();
             this.showLoadingPage();
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
@@ -32,6 +35,10 @@ import sharkImageUrl from './assets/shark-animate-sheared.svg';
             this.getZoteroItems(useLocal);
             console.log(tooltips);
             
+        },
+        polyfills(){
+            arrayFind();
+            NodeListForEach();
         },
         showLoadingPage(){
             console.log(sharkImageUrl);
@@ -133,17 +140,17 @@ import sharkImageUrl from './assets/shark-animate-sheared.svg';
                     .entries(values);
             }
         },
-        getZoteroCollections(useLocal){ // IMPORTANT this will break if # of collections exceeds 100. will needs to 
+        getZoteroCollections(){ // IMPORTANT this will break if # of collections exceeds 100. will needs to 
                                 // implement strategy use for getting items
 
             
-            if ( useLocal ){
+            /*if ( useLocal ){
                 model.collections = this.childrenify(zoteroCollections);
                 console.log('increment gateCheck from get collections');
                 this.gateCheck++;
                 view.init();
                 return;
-            }
+            }*/
 
             var promise = new Promise((resolve,reject) => {
                 var attempt = 0;
@@ -203,16 +210,16 @@ import sharkImageUrl from './assets/shark-animate-sheared.svg';
             });
 
         }, 
-        getZoteroItems(useLocal){   
+        getZoteroItems(){   
 
-            if ( useLocal ){
+           /* if ( useLocal ){
                 model.zoteroItems = zoteroItems;
                 this.parseZoteroItemDates();
                 console.log('increment gateCheck from get items');
                 this.gateCheck++;
                 view.init();
                 return;
-            }
+            }*/
 
             var initialItemsPromises = [],
                 subsequentItemsPromises = [],
@@ -654,7 +661,7 @@ import sharkImageUrl from './assets/shark-animate-sheared.svg';
             <p><a href="http://www.rff.org/files/faq.pdf">SHARC Frequently Asked Questions</a> (PDF)</p>
             <p><a href="http://www.rff.org/files/how-sharc-is-built.pdf">How SHARC Is Built</a> (PDF)</p>
             `;
-            document.querySelector('#sidebar').append(div);
+            document.querySelector('#sidebar').appendChild(div);
         },
         sidebarContact(){
              var div = document.createElement('div');
@@ -669,7 +676,7 @@ import sharkImageUrl from './assets/shark-animate-sheared.svg';
               <button type="submit">Send</button>
             </form>
           `;  
-          document.querySelector('#sidebar').append(div);
+          document.querySelector('#sidebar').appendChild(div);
         },
         makePieChart(){
             document.querySelector('#sidebar').insertAdjacentHTML('beforeend', '<h3>Publications by type</h3><p id="pie-header"></p>');

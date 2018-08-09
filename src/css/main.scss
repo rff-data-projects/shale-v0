@@ -190,3 +190,31 @@ body {
 .no-opacity {
   opacity: 0;
 }
+
+/*  targeting */
+
+@media all and (-ms-high-contrast:none){
+  header.landing-header:after, #loading-error:after { /* IE 10 */
+    content: 'This feature does not work on Internet Explorer 10 or earlier versions. Please try a different browser.';
+    color: $red;
+    display: block;
+    clear:left;
+  }
+  *::-ms-backdrop, header.landing-header:after, #loading-error:after { /* IE 11 */
+    content: 'This feature looks and works best on up-to-date browsers other than Internet Explorer.';
+    color: $red;
+    display: block;
+    clear:left;
+  }
+}
+
+.ie-message {
+  color: $red;
+}
+
+#sidebar {
+  will-change: scroll-position;
+  .contact-us textarea {
+    overflow: visible;
+  }
+}
