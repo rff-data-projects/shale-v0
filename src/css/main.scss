@@ -146,7 +146,6 @@ h1, h2, h3, h4, h5, h6 {
   padding: 40px 10px;
   > div {
     max-width:960px;
-    margin: auto;
   }
   #loading-status {
       transition: opacity 0.25s linear;
@@ -161,6 +160,13 @@ h1, h2, h3, h4, h5, h6 {
   }
   .sharc-loaded & {
     opacity: 0;
+  }
+}
+
+main > *:not(#app-container) {
+  visibility: hidden;
+  .sharc-loaded & {
+    visibility: visible;
   }
 }
 
@@ -179,10 +185,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  overflow: hidden;
   background-color: $light_blue;
   &.sharc-loaded  {
-    overflow: auto;
     background-color: #fff;
   }
 }
