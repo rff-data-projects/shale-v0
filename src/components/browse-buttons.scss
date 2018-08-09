@@ -24,7 +24,7 @@
         align-items: center;
         justify-content: center;
         font-size: 15px;
-        line-height: 120%;
+        line-height: 100%;
         position: relative;
         background-repeat: no-repeat;
         background-position: 98% 6%;
@@ -33,7 +33,7 @@
             background-image: url('./../assets/shark.svg');
         }
         span {
-            top: 2px;
+            top: 1px;
             position: relative;
         }
         &.button--tertiary {
