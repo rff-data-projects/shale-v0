@@ -795,7 +795,7 @@ import { NodeListForEach } from './polyfills.js';
               .attr('text-anchor', 'middle')
               .attr('font-size', 4)
               .attr('fill', d => {
-                if (d.data.name === 'journalArticle' || d.data.name === 'book' || d.data.name === 'report'){
+                if (d.data.name === 'journalArticle' || d.data.name === 'book' || d.data.name === 'report' || d.data.name === 'magazineArticle'){
                     return '#ffffff';
                 } else {
                     return '#000000';
@@ -844,15 +844,15 @@ import { NodeListForEach } from './polyfills.js';
             var legend = d3.select('#sidebar svg g.legend')
                 .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)');
             
+            legend
+                .selectAll('.legend-item')
+                .remove();
+            
             var legendItems = legend
                 .selectAll('.legend-item')
                 .data(pie(pieData), d => d.data.name);
 
-            legendItems.select('g.legend-item')
-                .attr('transform', (d,i) => 'translate(0,' + i * 7 + ')');
-
-            legendItems.exit().remove();
-
+           
             var enteringL = legendItems
                 .enter().append('g')
                 .attr('class', d => 'legend-item ' + d.data.name)
