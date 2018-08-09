@@ -1,25 +1,21 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
-import tooltips from './data/tooltips.csv';
 import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
 import smoothscroll from 'smoothscroll-polyfill';
-//import zoteroCollections from './data/zoteroCollections-8-8-18.json';
-//import zoteroItems from './data/zoteroItems-8-8-18.json';
 import searchHTML from 'html-loader!./components/form.html';
 import loadingPage from 'html-loader!./components/loading-page.html';
 import sharkImageUrl from './assets/shark-animate-sheared.svg';
 import { arrayFind } from './polyfills.js';
 import { NodeListForEach } from './polyfills.js';
 
-
-//import SWHandler from './utils/service-worker-handler.js';
    
 (function(){     
 /* global d3 */
 "use strict";  
-    const groupId = '2127948';
+    const groupId = '2127948'; // id of the Zotero group
+    const tooltipKey = '1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA'; // id of the Google Sheets tooltip dictionary
     var controller = { 
         gateCheck: 0, 
         searchType: 'fields',
@@ -31,9 +27,10 @@ import { NodeListForEach } from './polyfills.js';
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
             });
+
             this.getZoteroCollections(useLocal);
             this.getZoteroItems(useLocal);
-            console.log(tooltips);
+            this.returnCollectionTooltipTitles();
             
         },
         polyfills(){
@@ -56,7 +53,18 @@ import { NodeListForEach } from './polyfills.js';
                 },200);
             },3000);
         },
-
+        returnCollectionTooltipTitles(){ // gets data from Google Sheet, converst rows to key-value pairs, nests the data
+                              // as specified by the config object, and creates array of summarized data at different
+                              // nesting levels                                
+            d3.json('https://sheets.googleapis.com/v4/spreadsheets/' + tooltipKey + '/values/Sheet1?key=AIzaSyDD3W5wJeJF2esffZMQxNtEl9tt-OfgSq4', (error,data) => { 
+                if (error) {
+                    window.RFFApp.model.rejectTooltip(error);
+                    throw error;
+                }
+                var values = data.values;
+                model.tooltips = this.returnKeyValues(values);
+            });
+        },
         clearSearch(){
             var input = document.querySelector('#collection-search input');
             input.value = '';
@@ -579,7 +587,7 @@ import { NodeListForEach } from './polyfills.js';
         },
         attachTooltips(){
             document.querySelectorAll('.browse-buttons > div').forEach(btn => {
-                var match = tooltips.find(d => d.key === btn.dataset.collection);
+                var match = model.tooltips.find(d => d.key === btn.dataset.collection);
                 if ( match !== undefined ){
                     btn.setAttribute('title', match.title);
                     tippy.one(btn, {
