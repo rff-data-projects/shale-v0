@@ -44,9 +44,9 @@ export const createResultItem = function(d){
     linksDiv.className = 'links-div' + ' tippy-clipboard';
     linksDiv.setAttribute('title', 'Copied to clipboard');
     var pubURL;
-    if ( d.data.url && d.data.url !== '' ) {
+    if ( (d.data.url && d.data.url !== '' ) || (d.data.DOI && d.data.DOI !== '' )) {
         let link = document.createElement('a');
-        pubURL = d.data.url;
+        pubURL = ( d.data.url && d.data.url !== '' ) ? d.data.url : 'https://doi.org/' + d.data.DOI;
         link.setAttribute('href', pubURL);
         link.setAttribute('target', '_blank')
         link.setAttribute('class',`details-link`);
