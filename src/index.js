@@ -804,15 +804,41 @@ import { NodeListForEach } from './polyfills.js';
               .text(d => d.data.value);
 
             var pubTypes = {
-                journalArticle: 'journal articles',
-                report: 'reports',
-                webpage: 'webpages',
                 book: 'books',
-                other: 'other',
-                bookSection: 'chapters',
-                document: 'documents',
+                bookSection: 'book chapters',
+                journalArticle: 'journal articles',
                 magazineArticle: 'magazine articles',
-                presentation: 'presentations'
+                newspaperArticle: 'newspaper articles',
+                thesis: 'theses',
+                letter: 'letters',
+                manuscript: 'manuscripts',
+                interview: 'interviews',
+                film: 'films',
+                artwork: 'artwork',
+                webpage: 'webpages',
+                report: 'reports',
+                bill: 'bills',
+                case: 'cases',
+                hearing: 'hearings',
+                patent: 'patents',
+                statute: 'statutes',
+                email: 'emails',
+                map: 'maps',
+                blogPost: 'blog posts',
+                instantMessage: 'instant messages',
+                forumPost: 'form post',
+                audioRecording: 'audio',
+                presentation: 'presentation',
+                videoRecording: 'video',
+                tvBroadcast: 'TV',
+                radioBroadcast: 'radio',
+                podcast: 'podcasts',
+                computerProgram: 'software',
+                conferencePaper: 'conference papers',
+                document: 'documents',
+                encyclopediaArticle: 'encyclopedia',
+                dictionaryEntry: 'dictionary entries',
+                other: 'other'
             }
 
             var legend = d3.select('#sidebar svg g.legend')
