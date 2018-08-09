@@ -140,20 +140,21 @@ h1, h2, h3, h4, h5, h6 {
   right: 0;
   bottom: 0;
   left: 0;
-  background: $light_blue url('./../assets/spinner-white.svg') 50% calc(50vh - 50px) / 100px no-repeat;
   z-index: 11;
   transition: opacity 0.5s linear;
+  background-color: $light_blue;
+  padding: 40px 10px;
+  > div {
+    max-width:960px;
+    margin: auto;
+  }
   #loading-status {
       transition: opacity 0.25s linear;
   }
   h2 {
-    max-width: 960px;
     margin: 40px auto;
   }
   p {
-    max-width: 960px;
-    margin-left:auto;
-    margin-right: auto;
     &#loading-error {
       color: $red;
     }
@@ -161,6 +162,16 @@ h1, h2, h3, h4, h5, h6 {
   .sharc-loaded & {
     opacity: 0;
   }
+}
+
+#shark-image {
+    transition: transform 0.2s ease-in-out;
+    &.swimUp {
+      transform: skewY(3deg) skewX(1deg) rotate(-1deg);
+    }
+    &.swimDown {
+      transform: skewY(-3deg) skewX(-1deg) rotate(1deg);
+    }
 }  
 
 .container {

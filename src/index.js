@@ -8,6 +8,8 @@ import smoothscroll from 'smoothscroll-polyfill';
 import zoteroCollections from './data/zoteroCollections-8-8-18.json';
 import zoteroItems from './data/zoteroItems-8-8-18.json';
 import searchHTML from 'html-loader!./components/form.html';
+import loadingPage from 'html-loader!./components/loading-page.html';
+import sharkImageUrl from './assets/shark-animate-sheared.svg';
 
 
 //import SWHandler from './utils/service-worker-handler.js';
@@ -22,7 +24,7 @@ import searchHTML from 'html-loader!./components/form.html';
         init(useLocal){ // pass in true to bypass API and use local data
 
             //SWHandler.init();
-
+            this.showLoadingPage();
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
             });
@@ -31,6 +33,23 @@ import searchHTML from 'html-loader!./components/form.html';
             console.log(tooltips);
             
         },
+        showLoadingPage(){
+            console.log(sharkImageUrl);
+            document.querySelector('#app-container').insertAdjacentHTML('afterbegin', loadingPage);
+            var shark = document.querySelector('#shark-image');
+            shark.setAttribute('src',sharkImageUrl.replace(/"/g,''));
+            setInterval(() => {
+                shark.classList.add('swimUp');
+                setTimeout(() => {
+                    shark.classList.add('swimDown');
+                    setTimeout(() => {
+                        shark.classList.remove('swimUp');
+                        shark.classList.remove('swimDown');
+                    }, 200);
+                },200);
+            },3000);
+        },
+
         clearSearch(){
             var input = document.querySelector('#collection-search input');
             input.value = '';
@@ -125,9 +144,15 @@ import searchHTML from 'html-loader!./components/form.html';
                 view.init();
                 return;
             }
+
             var promise = new Promise((resolve,reject) => {
                 var attempt = 0;
+                var msgTimer;
                 function tryRequest(){
+                    clearTimeout(msgTimer);
+                    msgTimer = setTimeout(() => {
+                        controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
+                    },5000);
                     d3.json('https://api.zotero.org/groups/' + groupId + '/collections?limit=100', (error,data) => {
                         console.log(data);
                         if (error) {
@@ -144,6 +169,7 @@ import searchHTML from 'html-loader!./components/form.html';
                             console.log(JSON.stringify(data));
                             model.collections = this.childrenify(data);
                             controller.fadeInText(document.querySelector('#loading-status'),'Zotero collections received')
+                            clearTimeout(msgTimer);
                            // model.collections = this.recursiveNest(data, [d => d.data.parentCollection, d => d.data.parentCollection]);
                             resolve(model.collections); 
                         }
@@ -200,7 +226,12 @@ import searchHTML from 'html-loader!./components/form.html';
                 var promise = new Promise((resolve,reject) => { // using d3.request instead of .json to have access to the 
                                                                 // response headers. 'Total-Results', in partucular
                     var attempt = 0;
+                    var msgTimer;
                     function tryRequest(){
+                        clearTimeout(msgTimer);
+                        msgTimer = setTimeout(() => {
+                            controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
+                        },5000);
                         d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
                             if (error) {
                                 if ( attempt < 3 ){
@@ -214,6 +245,7 @@ import searchHTML from 'html-loader!./components/form.html';
                                 }
                             } else {
                                 console.log(+xhr.getResponseHeader('last-modified-version'));
+                                clearTimeout(msgTimer);
                                 controller.fadeInText(document.querySelector('#loading-status'), `Zotero items set ${overallIndex} received`)
                                 //model.lastModifiedVersion = model.lastModifiedVersion || +xhr.getResponseHeader('last-modified-version');
                                 resolve({
@@ -240,25 +272,31 @@ import searchHTML from 'html-loader!./components/form.html';
                         overallIndex++;
                     }
                     Promise.all([...initialItemsPromises,...subsequentItemsPromises]).then((values) => {
-                        window.dateStrings = [];
-                        values.forEach(value => { 
-                            //console.log(value.data.date);
-                            model.zoteroItems.push(...value.data);
-                        });
-                        console.log(JSON.stringify(model.zoteroItems));
-                        this.parseZoteroItemDates();
-                        this.gateCheck++;
-                        view.init();
+                        controller.fadeInText(document.querySelector('#loading-status'), `Almost there`)
+                        setTimeout(() => {
+                            window.dateStrings = [];
+                            values.forEach(value => { 
+                                //console.log(value.data.date);
+                                model.zoteroItems.push(...value.data);
+                            });
+                            console.log(JSON.stringify(model.zoteroItems));
+                            this.parseZoteroItemDates();
+                            this.gateCheck++;
+                            view.init();
+                        },500);
                     });
                 } else {
                     Promise.all(initialItemsPromises).then((values) => {
-                        console.log(values);
-                        values.forEach(value => {
-                            model.zoteroItems.push(...value.data);
-                        });
-                        this.parseZoteroItemDates(); 
-                        this.gateCeck++;
-                        view.init();
+                        controller.fadeInText(document.querySelector('#loading-status'), `Almost there`)
+                        setTimeout(() => {
+                            console.log(values);
+                            values.forEach(value => {
+                                model.zoteroItems.push(...value.data);
+                            });
+                            this.parseZoteroItemDates(); 
+                            this.gateCeck++;
+                            view.init();
+                        },500);
                     });        
                 }
                 
