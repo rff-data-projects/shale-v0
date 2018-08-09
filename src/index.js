@@ -479,6 +479,7 @@ import searchHTML from 'html-loader!./components/form.html';
             }
             console.log('READY!');
             console.log(model.zoteroItems);
+            this.removeSplash();
             this.renderTopicButtons();
             this.attachTooltips();
             console.log(model.collections);
@@ -492,6 +493,14 @@ import searchHTML from 'html-loader!./components/form.html';
             this.setupSidebar();
             controller.loading(false);
            
+        },
+        removeSplash(){
+
+            document.querySelector('body').classList.add('sharc-loaded')
+            setTimeout(() => {
+                var splash = document.querySelector('#loading-splash');
+                splash.parentNode.removeChild(splash);
+            }, 700);
         },
         smoothScroll(elem){
             elem.scrollIntoView({ behavior: 'smooth' })

@@ -123,7 +123,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 #app-container {
   display: inline-block;
-
 }
 #sidebar {
   position: sticky;
@@ -132,5 +131,36 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 100vh;
   .loading & {
     background: url('./../assets/spinner.svg') 100% 25px / 35px no-repeat;
+  }
+}
+
+#loading-splash {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: $light_blue url('./../assets/spinner-white.svg') 50% calc(50vh - 50px) / 100px no-repeat;
+  z-index: 11;
+  transition: opacity 0.5s linear;
+  h2 {
+    max-width: 960px;
+    margin: 40px auto;
+  }
+  .sharc-loaded & {
+    opacity: 0;
+  }
+}  
+
+.container {
+  position: relative;
+}
+
+body {
+  overflow: hidden;
+  background-color: $light_blue;
+  &.sharc-loaded  {
+    overflow: auto;
+    background-color: #fff;
   }
 }
