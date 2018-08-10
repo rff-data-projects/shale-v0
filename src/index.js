@@ -636,7 +636,7 @@ import { NodeListForEach } from './polyfills.js';
                     e.preventDefault();
                     controller.loading(true);
                     var input = this.querySelector('input').value;
-                    var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
+                    var APIString = 'https://api.zotero.org/groups/' + groupId + '/items/top?q=' + input + '&format=keys';
                     var promise = new Promise((resolve,reject) => {
                         d3.text(APIString, (error,data) => {
                             if (error) {
