@@ -126,3 +126,107 @@ h1, h2, h3, h4, h5, h6 {
   overflow-y: auto;
   max-height: 100vh;
 }
+
+/* DUPLICATE SOME RFF-WIDE STYLES SO THAT APP WILL SURVIVE CHANGES TO THE SITE */
+
+/* COLUMNS */
+
+.l-66-33--1 {
+    clear: left;
+    float: left;
+    width: 100%;
+    margin-left: 0%;
+    margin-right: -100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    @media (min-width: 700px) {
+        float: left;
+        width: 66.66667%;
+        margin-left: 0%;
+        margin-right: -66.66667%;
+        padding-left: 20px;
+        padding-right: 20px;
+        box-sizing: border-box;
+        word-wrap: break-word;
+    }
+}
+
+.l-66-33--2 {
+    clear: both;
+    float: left;
+    width: 100%;
+    margin-left: 0%;
+    margin-right: -100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    @media (min-width: 700px) {
+        clear: right;
+        float: right;
+        width: 33.33333%;
+        margin-right: 0%;
+        margin-left: -33.33333%;
+        padding-left: 20px;
+        padding-right: 20px;
+        box-sizing: border-box;
+        word-wrap: break-word;
+    }
+}
+
+/* BUTTONS */
+
+
+.button--secondary-full, .button--tertiary-full, .button--full, .button--secondary-small, .button--tertiary-small, .list-filter .views-submit-button input[type="submit"], .list-filter__button input[type="submit"], .button--small, .button--secondary, .button--tertiary, button, .button--quarternary, .form-submit, .search-form input[type="submit"], .button {
+    transition: all 0.1s ease-out;
+    box-sizing: border-box;
+    border-radius: 3px;
+    box-shadow: rgba(34,34,34,0.2) 2px 2px 3px;
+    display: inline-block;
+    margin: 0.15625em 0;
+    padding: 0.5625em 1.25em;
+    border: 1px solid transparent;
+    background: #051839;
+    color: #fff;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    @media (min-width: 700px) {
+        padding: 0.5625em 1.25em;
+    }
+    @media (min-width: 900px) {
+        padding: 0.59375em 1.25em;
+    }
+}
+.button--secondary {
+    background: #bfccd7;
+    color: #00163a;
+}
+
+/* LIST ITEMS */
+
+.list-item {
+    margin-bottom: 0.9375em;
+    padding-bottom: 0.9375em;
+    border-bottom: 1px solid #e6e7e8;
+    list-style: none;
+}
+
+.list-item__label {
+    font-size: 0.65em;
+    display: inline-block;
+    padding: 0.3125em 0.46875em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.list-item__meta {
+    font-size: 0.83em;
+    line-height: 1.31777em;
+    margin-bottom: 0.3125em;
+    display: block;
+}
