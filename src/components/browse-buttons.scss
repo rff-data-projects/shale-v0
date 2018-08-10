@@ -29,6 +29,10 @@
         background-repeat: no-repeat;
         background-position: 98% 6%;
         background-size: 23%;
+        @media (max-width: 599px) {
+            width: 120px;
+            font-size: 13px;
+        }
         &.issue-brief, &.literature-review {
             background-image: url('./../assets/shark.svg');
         }
@@ -48,6 +52,9 @@
             border: 1px dotted $blue;
             background-color: $light_blue;
             color: $blue;   
+        }
+        &.show-all {
+            margin-left: 0;
         }
 
     }

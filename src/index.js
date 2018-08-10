@@ -598,6 +598,7 @@ import { NodeListForEach } from './polyfills.js';
             });
         },
         setupSidebar(){
+
           
             var months = {
                 '0': 'January',
@@ -616,6 +617,7 @@ import { NodeListForEach } from './polyfills.js';
             var lastModifiedDate = d3.max(model.zoteroItems, d => new Date(d.data.dateModified));
             var version = d3.max(model.zoteroItems, d => d.data.version);
             var sidebar = document.querySelector('#sidebar');
+            this.controlToggleButton(sidebar);
             var html = `
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
@@ -627,6 +629,20 @@ import { NodeListForEach } from './polyfills.js';
             this.sidebarContact();   
             this.sibebarDocumentation();     
 
+        },
+        controlToggleButton(sidebar){
+            var button = document.querySelector('button.toggle-sidebar');
+            button.onclick = () => {
+                console.log('click');
+                this.toggleSidebar(sidebar, button);
+            };
+        },
+        toggleSidebar(sidebar, button){
+            console.log('click');
+            sidebar.classList.toggle('show');
+            button.innerHTML = button.innerHTML === 'more' ? 'close' : 'more';
+            document.querySelector('body').classList.toggle('scroll-lock');
+            document.querySelector('html').classList.toggle('scroll-lock');
         },
         addSearch(){
             document.querySelector('#sidebar').insertAdjacentHTML('beforeend', searchHTML);

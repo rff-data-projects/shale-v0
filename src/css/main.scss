@@ -43,6 +43,9 @@ h1, h2, h3, h4, h5, h6 {
  	align-items: center;
  }
 
+.scroll-lock {
+  overflow:hidden;
+}
 
 .tippy-tooltip.RFF-theme {
   /* Your styling here. Example: */
@@ -140,8 +143,16 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   overflow-y: auto;
   max-height: 100vh;
+  will-change: scroll-position;
+  background-color: #fff;
+  transition: transform 0.75s linear;
+  transform: translate(0,0);
+  z-index: 9;
   .loading & {
     background: url('./../assets/spinner.svg') 100% 25px / 35px no-repeat;
+  }
+  .contact-us textarea {
+    overflow: visible;
   }
 }
 
@@ -230,14 +241,55 @@ body {
   color: $red;
 }
 
-#sidebar {
-  will-change: scroll-position;
-  .contact-us textarea {
-    overflow: visible;
+
+
+p { max-width: 850px;}
+
+.l-66-33--1 {
+  padding-left: 0;
+}
+
+
+@media (max-width: 699px) {
+  .l-1up {
+    padding: 0;
+  }
+  .category-group {
+    padding: 10px 0;
+  }
+  #sidebar {
+    position: fixed;
+    left:0;
+    top:0;
+    transform: translate(100%, 0);
+    &.show {
+      transform: translate(0, 0);
+    }
   }
 }
 
-p { max-width: 850px;}
+@media (max-width: 899px) {
+  .browse-buttons {
+    justify-content: center;
+  }
+}
+
+button.toggle-sidebar {
+    display:none;
+    will-change: scroll-position;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+    transform: rotate(-90deg) translate(100%,0);
+    transform-origin: bottom right;
+    .sharc-loaded & {
+      display: block;
+      @media (min-width: 700px) {
+        display: none;
+      }
+    }
+}
 
 /* DUPLICATE SOME RFF-WIDE STYLES SO THAT APP WILL SURVIVE CHANGES TO THE SITE */
 
