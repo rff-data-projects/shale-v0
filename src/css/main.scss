@@ -139,7 +139,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 #app-container {
   display: inline-block;
-  overflow-x: hidden;
 }
 #sidebar {
   position: sticky;
@@ -306,8 +305,7 @@ button.toggle-sidebar {
     bottom: 0;
     right: 0;
     z-index: 10;
-    transform: rotate(-90deg) translate(100%,0);
-    transform-origin: bottom right;
+    
     .sharc-loaded & {
       display: block;
       @media (min-width: 700px) {
