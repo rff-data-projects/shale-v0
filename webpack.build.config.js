@@ -3,7 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const scssSharedLoaders = [{ // defining array of css loaders here to avoid duplication below
@@ -122,27 +121,7 @@ module.exports = {
 	      // both options are optional
 	      filename: "css/styles.css",
 	      chunkFilename: "[id].css",
-	    }),
-        new CopyWebpackPlugin([{
-                from: 'data/*.*',
-                context: 'src'
-            },
-            {
-                from: 'assets/icon*.*',
-                context: 'src'
-            },
-            {
-                from: 'RFF/**/*.*',
-                context: 'src'
-            },
-            {
-                from: 'manifest.json',
-                context: 'src'
-            }]),
-        new webpack.NormalModuleReplacementPlugin(
-          /utils\/sw-dev\.js/,
-          './sw-prod.js'
-        )
+	    })
     ],
   	output: {
     	filename: '[name].js',
