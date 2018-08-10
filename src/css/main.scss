@@ -280,7 +280,20 @@ p { max-width: 850px;}
     justify-content: center;
   }
 }
-
+button.back-to-top {
+  left:50%;
+  transform: translate(-50%,0);
+  position:sticky;
+  top:0;
+  z-index:13;
+  transition: opacity 0.2s linear;
+  opacity:0;
+  pointer-events: none;
+  &.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
 button.toggle-sidebar {
     display:none;
     will-change: scroll-position;

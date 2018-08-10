@@ -9,6 +9,7 @@ import loadingPage from 'html-loader!./components/loading-page.html';
 import sharkImageUrl from './assets/shark-animate-sheared.svg';
 import { arrayFind } from './polyfills.js';
 import { NodeListForEach } from './polyfills.js';
+import scrollMonitor from 'scrollmonitor';
 
    
 (function(){     
@@ -571,8 +572,20 @@ import { NodeListForEach } from './polyfills.js';
             controller.fadeInText(document.querySelector('#loading-status'),'Almost ready')
             this.setupSidebar();
             this.removeSplash();
+            this.setScrollMonitor();
             controller.loading(false);
            
+        },
+        setScrollMonitor(){
+            var el = document.querySelector('#browse-buttons-container');
+            var watcher = scrollMonitor.create( el, 200);
+            var btn = document.querySelector('button.back-to-top');
+            watcher.exitViewport(function(){
+                btn.classList.add('show');
+            });
+            watcher.enterViewport(function(){
+                btn.classList.remove('show');
+            });
         },
         removeSplash(){
 
@@ -618,6 +631,7 @@ import { NodeListForEach } from './polyfills.js';
             var version = d3.max(model.zoteroItems, d => d.data.version);
             var sidebar = document.querySelector('#sidebar');
             this.controlToggleButton(sidebar);
+            this.controlBackToTop();
             var html = `
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
@@ -635,6 +649,12 @@ import { NodeListForEach } from './polyfills.js';
             button.onclick = () => {
                 console.log('click');
                 this.toggleSidebar(sidebar, button);
+            };
+        },
+        controlBackToTop(){
+            var button = document.querySelector('button.back-to-top');
+            button.onclick = () => {
+                window.scroll({ top: 0, left: 0, behavior: 'smooth' });
             };
         },
         toggleSidebar(sidebar, button){
