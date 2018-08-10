@@ -153,8 +153,12 @@ h1, h2, h3, h4, h5, h6 {
   .loading & {
     background: url('./../assets/spinner.svg') 100% 25px / 35px no-repeat;
   }
-  .contact-us textarea {
-    overflow: visible;
+  .contact-us {
+    
+    textarea {
+      overflow: visible;
+    }
+
   }
   svg {
     max-width: 400px;
@@ -310,6 +314,8 @@ button.toggle-sidebar {
       }
     }
 }
+
+
 
 /* DUPLICATE SOME RFF-WIDE STYLES SO THAT APP WILL SURVIVE CHANGES TO THE SITE */
 

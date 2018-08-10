@@ -712,13 +712,11 @@ import scrollMonitor from 'scrollmonitor';
             div.className = 'contact-us';
           div.innerHTML = `
             <h3>Get in touch</h3>
-              <form><!--<form method="POST" action="http://formspree.io/XXXXXXX" _lpchecked="1">-->
-              <input type="email" name="email" placeholder="Your email">
-              <textarea name="message" placeholder="Your message"></textarea>
-                <input type="text" name="_gotcha" style="display:none">
-                <input type="hidden" name="_next" value="/projects/?thanks">
-              <button type="submit">Send</button>
-            </form>
+              <form method="POST" action="https://formspree.io/sharc@rff.org">
+                  <input type="email" name="email" placeholder="Your email">
+                  <textarea name="message" placeholder="Your message"></textarea>
+                  <button type="submit">Send</button>
+                </form>
           `;  
           document.querySelector('#sidebar').appendChild(div);
         },
