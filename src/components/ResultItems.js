@@ -3,7 +3,8 @@ console.log(styles);
 /* ******** */
 
 export const createResultsContainer = function(){
-  var html = `<div class="synthesis-results">
+  var html = `<div class="no-results-message"></div>
+             <div class="synthesis-results">
                   <ul class="flex space-between"></ul>
               </div>
               <div class="results">
@@ -43,9 +44,9 @@ export const createResultItem = function(d){
     linksDiv.className = 'links-div' + ' tippy-clipboard';
     linksDiv.setAttribute('title', 'Copied to clipboard');
     var pubURL;
-    if ( d.data.url && d.data.url !== '' ) {
+    if ( (d.data.url && d.data.url !== '' ) || (d.data.DOI && d.data.DOI !== '' )) {
         let link = document.createElement('a');
-        pubURL = d.data.url;
+        pubURL = ( d.data.url && d.data.url !== '' ) ? d.data.url : 'https://doi.org/' + d.data.DOI;
         link.setAttribute('href', pubURL);
         link.setAttribute('target', '_blank')
         link.setAttribute('class',`details-link`);

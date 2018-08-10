@@ -49,6 +49,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(#fff, 0.9);
   border: 2px solid $blue;
   color: $dark_gray;
+  overflow: hidden;
 }
 
 #search-type {
@@ -64,6 +65,16 @@ h1, h2, h3, h4, h5, h6 {
 
 
 .pubtype-pie {
+
+    .loading & {
+      opacity: 0.3;
+    }
+
+    .arc, .legend-item {
+      path, rect {
+        fill: $light_blue;
+      }
+    }
   
     .journalArticle {
       path, rect {
@@ -115,14 +126,115 @@ h1, h2, h3, h4, h5, h6 {
         fill: lighten($gold, 20%);
       }
     }
+    .conferencePaper {
+      path, rect {
+        fill: lighten($green, 20%);
+      }
+    }
 }
 #app-container {
   display: inline-block;
-
 }
 #sidebar {
   position: sticky;
   top: 0;
   overflow-y: auto;
   max-height: 100vh;
+  .loading & {
+    background: url('./../assets/spinner.svg') 100% 25px / 35px no-repeat;
+  }
 }
+
+#loading-splash {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 11;
+  transition: opacity 0.5s linear;
+  background-color: $light_blue;
+  padding: 40px 10px;
+  > div {
+    max-width:960px;
+  }
+  #loading-status {
+      transition: opacity 0.25s linear;
+  }
+  h2 {
+    margin: 40px auto;
+  }
+  p {
+    &#loading-error {
+      color: $red;
+    }
+  }
+  .sharc-loaded & {
+    opacity: 0;
+  }
+}
+
+main > *:not(#app-container) {
+  visibility: hidden;
+  .sharc-loaded & {
+    visibility: visible;
+  }
+}
+
+#shark-image {
+    transition: transform 0.2s ease-in-out;
+    &.swimUp {
+      transform: skewY(3deg) skewX(1deg) rotate(-1deg);
+    }
+    &.swimDown {
+      transform: skewY(-3deg) skewX(-1deg) rotate(1deg);
+    }
+}  
+
+.container {
+  position: relative;
+}
+
+body {
+  background-color: $light_blue;
+  &.sharc-loaded  {
+    background-color: #fff;
+  }
+}
+
+.no-opacity {
+  opacity: 0;
+}
+
+.contact-us textarea {
+  height: 10em;
+}
+/*  targeting */
+
+@media all and (-ms-high-contrast:none){
+  header.landing-header:after, #loading-error:after { /* IE 10 */
+    content: 'This feature does not work on Internet Explorer 10 or earlier versions. Please try a different browser.';
+    color: $red;
+    display: block;
+    clear:left;
+  }
+  *::-ms-backdrop, header.landing-header:after, #loading-error:after { /* IE 11 */
+    content: 'This feature looks and works best on up-to-date browsers other than Internet Explorer.';
+    color: $red;
+    display: block;
+    clear:left;
+  }
+}
+
+.ie-message {
+  color: $red;
+}
+
+#sidebar {
+  will-change: scroll-position;
+  .contact-us textarea {
+    overflow: visible;
+  }
+}
+
+p { max-width: 850px;}

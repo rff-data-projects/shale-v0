@@ -1,43 +1,81 @@
 import './css/main.scss';
 import '../helpers/string-helpers';
-import tooltips from './data/tooltips.csv';
 import tippy from 'tippy.js';
 import { createBrowseCategory, createTopicKey } from './components/BrowseButtons';
 import { createResultsContainer, createResultItem, filterResults } from './components/ResultItems'; 
 import smoothscroll from 'smoothscroll-polyfill';
-import zoteroCollections from './data/zoteroCollections-7-25-18.json';
-import zoteroItems from './data/zoteroItems-7-25-18.json';
 import searchHTML from 'html-loader!./components/form.html';
+import loadingPage from 'html-loader!./components/loading-page.html';
+import sharkImageUrl from './assets/shark-animate-sheared.svg';
+import { arrayFind } from './polyfills.js';
+import { NodeListForEach } from './polyfills.js';
 
-
-//import SWHandler from './utils/service-worker-handler.js';
    
 (function(){     
 /* global d3 */
 "use strict";  
-    const groupId = '2127948';
+    const groupId = '2127948'; // id of the Zotero group
+    const tooltipKey = '1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA'; // id of the Google Sheets tooltip dictionary
     var controller = { 
         gateCheck: 0, 
         searchType: 'fields',
         init(useLocal){ // pass in true to bypass API and use local data
 
             //SWHandler.init();
-
+            this.polyfills();
+            this.showLoadingPage();
             window.RFFApp.model.topicButtonPromise = new Promise((resolve) => {
                 window.RFFApp.model.resolveTopicButtons = resolve;
             });
+
             this.getZoteroCollections(useLocal);
             this.getZoteroItems(useLocal);
-            console.log(tooltips);
+            this.returnCollectionTooltipTitles();
             
+        },
+        polyfills(){
+            arrayFind();
+            NodeListForEach();
+        },
+        showLoadingPage(){
+            console.log(sharkImageUrl);
+            document.querySelector('#app-container').insertAdjacentHTML('afterbegin', loadingPage);
+            var shark = document.querySelector('#shark-image');
+            shark.setAttribute('src',sharkImageUrl.replace(/"/g,''));
+            setInterval(() => {
+                shark.classList.add('swimUp');
+                setTimeout(() => {
+                    shark.classList.add('swimDown');
+                    setTimeout(() => {
+                        shark.classList.remove('swimUp');
+                        shark.classList.remove('swimDown');
+                    }, 200);
+                },200);
+            },3000);
+        },
+        returnCollectionTooltipTitles(){ // gets data from Google Sheet, converst rows to key-value pairs, nests the data
+                              // as specified by the config object, and creates array of summarized data at different
+                              // nesting levels                                
+            d3.json('https://sheets.googleapis.com/v4/spreadsheets/' + tooltipKey + '/values/Sheet1?key=AIzaSyDD3W5wJeJF2esffZMQxNtEl9tt-OfgSq4', (error,data) => { 
+                if (error) {
+                    window.RFFApp.model.rejectTooltip(error);
+                    throw error;
+                }
+                var values = data.values;
+                model.tooltips = this.returnKeyValues(values);
+            });
         },
         clearSearch(){
             var input = document.querySelector('#collection-search input');
             input.value = '';
             input.setAttribute('placeholder', 'Search by title, author, or year');
-
+            this.clearSearchMessage();
         },
-        
+        clearSearchMessage(){
+            document.querySelectorAll('.no-results-message').forEach(msg => {
+                msg.innerHTML = '';
+            });
+        },
         getSearchItems(keys, input) {
             var searchItems = model.zoteroItems.filter(item => keys.indexOf(item.key) !== -1 );
             console.log(searchItems);
@@ -110,20 +148,26 @@ import searchHTML from 'html-loader!./components/form.html';
                     .entries(values);
             }
         },
-        getZoteroCollections(useLocal){ // IMPORTANT this will break if # of collections exceeds 100. will needs to 
+        getZoteroCollections(){ // IMPORTANT this will break if # of collections exceeds 100. will needs to 
                                 // implement strategy use for getting items
 
             
-            if ( useLocal ){
+            /*if ( useLocal ){
                 model.collections = this.childrenify(zoteroCollections);
                 console.log('increment gateCheck from get collections');
                 this.gateCheck++;
                 view.init();
                 return;
-            }
+            }*/
+
             var promise = new Promise((resolve,reject) => {
                 var attempt = 0;
+                var msgTimer;
                 function tryRequest(){
+                    clearTimeout(msgTimer);
+                    msgTimer = setTimeout(() => {
+                        controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
+                    },5000);
                     d3.json('https://api.zotero.org/groups/' + groupId + '/collections?limit=100', (error,data) => {
                         console.log(data);
                         if (error) {
@@ -132,12 +176,15 @@ import searchHTML from 'html-loader!./components/form.html';
                                 attempt++;
                                 tryRequest();
                             } else {
+                                controller.fadeInText(document.querySelector('#loading-error'),'There was an error loading collections from Zotero. Please try again.')
                                 reject(error);
                                 throw error;
                             }
                         } else {
                             console.log(JSON.stringify(data));
                             model.collections = this.childrenify(data);
+                            controller.fadeInText(document.querySelector('#loading-status'),'Zotero collections received')
+                            clearTimeout(msgTimer);
                            // model.collections = this.recursiveNest(data, [d => d.data.parentCollection, d => d.data.parentCollection]);
                             resolve(model.collections); 
                         }
@@ -153,30 +200,53 @@ import searchHTML from 'html-loader!./components/form.html';
                 this.gateCheck++;
                 view.init();
             }); 
-        }, 
-        getZoteroItems(useLocal){   
+        },
+        fadeOutText(el){
+            el.classList.add('no-opacity');
+        },
+        fadeInText(el,text){
+            return new Promise((resolve) => {
+                var durationStr = window.getComputedStyle(el).getPropertyValue('transition-duration');
+                var duration = parseFloat(durationStr) * 1000;
+                console.log(duration);
+                controller.fadeOutText(el);
+                setTimeout(() => {
+                    el.innerHTML = text;
+                    el.classList.remove('no-opacity');
+                    resolve(true);
+                }, duration);
+            });
 
-            if ( useLocal ){
+        }, 
+        getZoteroItems(){   
+
+           /* if ( useLocal ){
                 model.zoteroItems = zoteroItems;
                 this.parseZoteroItemDates();
                 console.log('increment gateCheck from get items');
                 this.gateCheck++;
                 view.init();
                 return;
-            }
+            }*/
 
             var initialItemsPromises = [],
                 subsequentItemsPromises = [],
                 initialMax = 9, // last known number of times the API must be hit to get all results. 100 returned at a time,
                                 // so 3 would get up to 300 hundred. time of coding total was 284; when the toal increases
                                 // the code below will make addition API calls
-                throttle = 500; // ms by which to delay successive api calls to avoid 500 error (?)
+                throttle = 500, // ms by which to delay successive api calls to avoid 500 error (?)
+                overallIndex = 1;
             
-            function constructPromise(i){
+            function constructPromise(i,overallIndex){
                 var promise = new Promise((resolve,reject) => { // using d3.request instead of .json to have access to the 
                                                                 // response headers. 'Total-Results', in partucular
                     var attempt = 0;
+                    var msgTimer;
                     function tryRequest(){
+                        clearTimeout(msgTimer);
+                        msgTimer = setTimeout(() => {
+                            controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
+                        },5000);
                         d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
                             if (error) {
                                 if ( attempt < 3 ){
@@ -184,12 +254,14 @@ import searchHTML from 'html-loader!./components/form.html';
                                     attempt++;
                                     tryRequest();
                                 } else {
-                                    // TO DO: WHAT TO DO WHEN THERE'S AN ERROR ?
+                                    controller.fadeInText(document.querySelector('#loading-error'),`There was an error loading items set ${overallIndex} from Zotero. Please try again.`)
                                     reject(error);
                                     throw error;
                                 }
                             } else {
                                 console.log(+xhr.getResponseHeader('last-modified-version'));
+                                clearTimeout(msgTimer);
+                                controller.fadeInText(document.querySelector('#loading-status'), `Zotero items set ${overallIndex} received`)
                                 //model.lastModifiedVersion = model.lastModifiedVersion || +xhr.getResponseHeader('last-modified-version');
                                 resolve({
                                     total: +xhr.getResponseHeader('Total-Results'), // + operand coerces to number
@@ -204,34 +276,42 @@ import searchHTML from 'html-loader!./components/form.html';
             }
 
             for ( let i = 0; i < initialMax; i++ ){
-                setTimeout(initialItemsPromises.push(constructPromise(i)), i * throttle);
+                setTimeout(initialItemsPromises.push(constructPromise(i, overallIndex)), i * throttle);
+                overallIndex++;
             }
             Promise.race(initialItemsPromises).then(value => {
                 console.log(value);
                 if ( value.total > initialMax ) {
                     for ( let i = initialMax; i < Math.ceil(value.total / 100); i++ ){
-                        subsequentItemsPromises.push(constructPromise(i));
+                        subsequentItemsPromises.push(constructPromise(i, overallIndex));
+                        overallIndex++;
                     }
                     Promise.all([...initialItemsPromises,...subsequentItemsPromises]).then((values) => {
-                        window.dateStrings = [];
-                        values.forEach(value => { 
-                            //console.log(value.data.date);
-                            model.zoteroItems.push(...value.data);
-                        });
-                        console.log(JSON.stringify(model.zoteroItems));
-                        this.parseZoteroItemDates();
-                        this.gateCheck++;
-                        view.init();
+                        controller.fadeInText(document.querySelector('#loading-status'), `Almost there`)
+                        setTimeout(() => {
+                            window.dateStrings = [];
+                            values.forEach(value => { 
+                                //console.log(value.data.date);
+                                model.zoteroItems.push(...value.data);
+                            });
+                            console.log(JSON.stringify(model.zoteroItems));
+                            this.parseZoteroItemDates();
+                            this.gateCheck++;
+                            view.init();
+                        },500);
                     });
                 } else {
                     Promise.all(initialItemsPromises).then((values) => {
-                        console.log(values);
-                        values.forEach(value => {
-                            model.zoteroItems.push(...value.data);
-                        });
-                        this.parseZoteroItemDates(); 
-                        this.gateCeck++;
-                        view.init();
+                        controller.fadeInText(document.querySelector('#loading-status'), `Almost there`)
+                        setTimeout(() => {
+                            console.log(values);
+                            values.forEach(value => {
+                                model.zoteroItems.push(...value.data);
+                            });
+                            this.parseZoteroItemDates(); 
+                            this.gateCeck++;
+                            view.init();
+                        },500);
                     });        
                 }
                 
@@ -442,8 +522,22 @@ import searchHTML from 'html-loader!./components/form.html';
             console.log('Oops, unable to copy');
           }
 
-        }  
-
+        },
+        loading(isLoading){
+            if ( isLoading ){
+                document.querySelector('body').classList.add('loading');
+            } else {
+                document.querySelector('body').classList.remove('loading');
+            }
+        },  
+        noSearchResults(term){
+            this.clearSearch();
+            document.querySelectorAll('.no-results-message').forEach(msg => {
+                msg.innerHTML = `No results for "${term}"`;
+            });
+           
+               
+        }
 
     }; 
  
@@ -459,6 +553,9 @@ import searchHTML from 'html-loader!./components/form.html';
                 //console.log('return');
                 return;
             }
+            setTimeout(() => {
+                controller.fadeInText(document.querySelector('#loading-status'),'Initializing the view');
+            });
             console.log('READY!');
             console.log(model.zoteroItems);
             this.renderTopicButtons();
@@ -471,16 +568,26 @@ import searchHTML from 'html-loader!./components/form.html';
             // being called first
             //filterResults.call(view, undefined, controller);
             //view.filterSynthesisResults.call(view,[]);
+            controller.fadeInText(document.querySelector('#loading-status'),'Almost ready')
             this.setupSidebar();
-            this.loading(false);
+            this.removeSplash();
+            controller.loading(false);
            
+        },
+        removeSplash(){
+
+            document.querySelector('body').classList.add('sharc-loaded')
+            setTimeout(() => {
+                var splash = document.querySelector('#loading-splash');
+                splash.parentNode.removeChild(splash);
+            }, 700);
         },
         smoothScroll(elem){
             elem.scrollIntoView({ behavior: 'smooth' })
         },
         attachTooltips(){
             document.querySelectorAll('.browse-buttons > div').forEach(btn => {
-                var match = tooltips.find(d => d.key === btn.dataset.collection);
+                var match = model.tooltips.find(d => d.key === btn.dataset.collection);
                 if ( match !== undefined ){
                     btn.setAttribute('title', match.title);
                     tippy.one(btn, {
@@ -527,25 +634,29 @@ import searchHTML from 'html-loader!./components/form.html';
             function searchOnRender(){
                 document.getElementById('collection-search').onsubmit = function(e){
                     e.preventDefault();
-                    view.loading(true);
+                    controller.loading(true);
                     var input = this.querySelector('input').value;
-                    var APIString = 'https://api.zotero.org/groups/' + groupId + '/items?q=' + input + '&format=keys';
+                    var APIString = 'https://api.zotero.org/groups/' + groupId + '/items/top?q=' + input + '&format=keys';
                     var promise = new Promise((resolve,reject) => {
                         d3.text(APIString, (error,data) => {
                             if (error) {
                                 reject(error);
                                 throw error;
                             }
-                            
-                            resolve(data.split(/\n/)); 
+                            var splitData = data.split(/\n/) || [data];
+                            console.log(splitData);
+                            resolve(splitData); 
                         });
                     });
                     promise.then(v => {
                         console.log(v);
                         if (v[0] !== ''){
+                            controller.clearSearchMessage();
                             controller.getSearchItems(v, input);
-                            view.loading(false);
+                        } else {
+                            controller.noSearchResults(input);
                         }
+                        controller.loading(false);
                     });
                 };
             }
@@ -558,7 +669,7 @@ import searchHTML from 'html-loader!./components/form.html';
             <p><a href="http://www.rff.org/files/faq.pdf">SHARC Frequently Asked Questions</a> (PDF)</p>
             <p><a href="http://www.rff.org/files/how-sharc-is-built.pdf">How SHARC Is Built</a> (PDF)</p>
             `;
-            document.querySelector('#sidebar').append(div);
+            document.querySelector('#sidebar').appendChild(div);
         },
         sidebarContact(){
              var div = document.createElement('div');
@@ -573,7 +684,7 @@ import searchHTML from 'html-loader!./components/form.html';
               <button type="submit">Send</button>
             </form>
           `;  
-          document.querySelector('#sidebar').append(div);
+          document.querySelector('#sidebar').appendChild(div);
         },
         makePieChart(){
             document.querySelector('#sidebar').insertAdjacentHTML('beforeend', '<h3>Publications by type</h3><p id="pie-header"></p>');
@@ -684,7 +795,7 @@ import searchHTML from 'html-loader!./components/form.html';
               .attr('text-anchor', 'middle')
               .attr('font-size', 4)
               .attr('fill', d => {
-                if (d.data.name === 'journalArticle' || d.data.name === 'book' || d.data.name === 'report'){
+                if (d.data.name === 'journalArticle' || d.data.name === 'book' || d.data.name === 'report' || d.data.name === 'magazineArticle'){
                     return '#ffffff';
                 } else {
                     return '#000000';
@@ -693,29 +804,55 @@ import searchHTML from 'html-loader!./components/form.html';
               .text(d => d.data.value);
 
             var pubTypes = {
-                journalArticle: 'journal articles',
-                report: 'reports',
-                webpage: 'webpages',
                 book: 'books',
-                other: 'other',
-                bookSection: 'chapters',
-                document: 'documents',
+                bookSection: 'book chapters',
+                journalArticle: 'journal articles',
                 magazineArticle: 'magazine articles',
-                presentation: 'presentations'
+                newspaperArticle: 'newspaper articles',
+                thesis: 'theses',
+                letter: 'letters',
+                manuscript: 'manuscripts',
+                interview: 'interviews',
+                film: 'films',
+                artwork: 'artwork',
+                webpage: 'webpages',
+                report: 'reports',
+                bill: 'bills',
+                case: 'cases',
+                hearing: 'hearings',
+                patent: 'patents',
+                statute: 'statutes',
+                email: 'emails',
+                map: 'maps',
+                blogPost: 'blog posts',
+                instantMessage: 'instant messages',
+                forumPost: 'form post',
+                audioRecording: 'audio',
+                presentation: 'presentation',
+                videoRecording: 'video',
+                tvBroadcast: 'TV',
+                radioBroadcast: 'radio',
+                podcast: 'podcasts',
+                computerProgram: 'software',
+                conferencePaper: 'conference papers',
+                document: 'documents',
+                encyclopediaArticle: 'encyclopedia',
+                dictionaryEntry: 'dictionary entries',
+                other: 'other'
             }
 
             var legend = d3.select('#sidebar svg g.legend')
                 .attr('transform', 'translate(' + ( radius * 2 + 5 ) + ',2)');
             
+            legend
+                .selectAll('.legend-item')
+                .remove();
+            
             var legendItems = legend
                 .selectAll('.legend-item')
                 .data(pie(pieData), d => d.data.name);
 
-            legendItems.select('g.legend-item')
-                .attr('transform', (d,i) => 'translate(0,' + i * 7 + ')');
-
-            legendItems.exit().remove();
-
+           
             var enteringL = legendItems
                 .enter().append('g')
                 .attr('class', d => 'legend-item ' + d.data.name)
@@ -746,13 +883,7 @@ import searchHTML from 'html-loader!./components/form.html';
 
           
         },
-        loading(isLoading){
-            if ( isLoading ){
-                document.querySelector('body').classList.add('loading');
-            } else {
-                document.querySelector('body').classList.remove('loading');
-            }
-        },
+        
         renderTopicButtons(){
             var section = document.getElementById('browse-buttons-container');
             var categories = model.collections.filter(d => d.data.parentCollection === false).sort((a,b) => d3.ascending(a.data.name, b.data.name));
@@ -770,6 +901,7 @@ import searchHTML from 'html-loader!./components/form.html';
             this.renderShowAllSyntheses();
         },
         renderShowAllButton(){
+
             var div = document.createElement('div');
             div.id = 'show-all-container';
             div.className = 'browse-buttons';
@@ -783,15 +915,19 @@ import searchHTML from 'html-loader!./components/form.html';
 
             showAll
                 .on('click', function(){
-                     d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
-                                                             // do the same thing
-                        .classed('active', false);
-                    d3.select(this)
-                        .classed('active', true);
-                    filterResults.call(view, undefined, controller);
-                    view.filterSynthesisResults.call(view,[]);
-                    view.updatePieChart(model.zoteroItems, 'All topics');
-                    controller.clearSearch();
+                    controller.loading(true);
+                    setTimeout(() => { // setTimeout needed to allow for load to take effect
+                        d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                                                                 // do the same thing
+                            .classed('active', false);
+                        d3.select(this)
+                            .classed('active', true);
+                        filterResults.call(view, undefined, controller);
+                        view.filterSynthesisResults.call(view,[]);
+                        view.updatePieChart(model.zoteroItems, 'All topics');
+                        controller.clearSearch();
+                        controller.loading(false);
+                    });
                     
                 });
             showAll     
@@ -806,16 +942,20 @@ import searchHTML from 'html-loader!./components/form.html';
                 .attr('class', 'button button--secondary show-syntheses');
             showAll
                 .on('click', function(){
-                   d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
-                                                             // do the same thing
-                        .classed('active', false);
-                    d3.select(this)
-                        .classed('active', true);
-                    controller.getCollectionItems('syntheses-only');
-                    //filterResults.call(view, 'none', controller);
-                    //view.filterSynthesisResults.call(view,[]);
-                    //view.updatePieChart(model.zoteroItems, 'Curated reviews');
-                    controller.clearSearch();
+                  controller.loading(true);
+                   setTimeout(() => {
+                       d3.selectAll('.browse-buttons .button')  // not DRY; need to bring out into fn; browsebuttons 
+                                                                 // do the same thing
+                            .classed('active', false);
+                        d3.select(this)
+                            .classed('active', true);
+                        controller.getCollectionItems('syntheses-only');
+                        //filterResults.call(view, 'none', controller);
+                        //view.filterSynthesisResults.call(view,[]);
+                        //view.updatePieChart(model.zoteroItems, 'Curated reviews');
+                        controller.clearSearch();
+                        controller.loading(false);
+                  });
                 });
             showAll     
                 .append('span')
@@ -840,10 +980,8 @@ import searchHTML from 'html-loader!./components/form.html';
                 .classed('RFF', true)
                 .classed('entering', true)
                 .classed('list-item', true)
-                .html(d => createResultItem(d))
-                .on('click', function(){
-                    window.open('./pdf/' + this.id + '.pdf', '_blank');
-                });
+                .html(d => createResultItem(d));
+                
 
             setTimeout(function(){
                 entering.classed('entering',false);    
@@ -858,6 +996,6 @@ import searchHTML from 'html-loader!./components/form.html';
         controller,
         model 
     };
-    controller.init(true); // pass in `true` to use local snapshot instead of API
+    controller.init(); // pass in `true` to use local snapshot instead of API
      
 }()); // end IIFE 

@@ -1,11 +1,5 @@
 @import '../css/variables.scss';
 
-.loading .loadable {
-    background: url(./../assets/spinner.svg) no-repeat;
-    background-size: 40px;
-
-}
-
 .synthesis-results li {
     border: 2px solid $blue !important;
     padding: 10px;
@@ -31,12 +25,11 @@
 
 .results, .synthesis-results {
     width: 100%;
-
-    
     ul {
         padding: 40px 0 0 0;
         .loading & {
-            opacity: 0.5;
+            opacity: 0.3;
+            pointer-events:none;
         }
     }
     .list-item.show-details {
@@ -224,6 +217,15 @@
     top:0;
     z-index: 9;
     background-color: #fff;
+    .loading & {
+        background: url('./../assets/spinner.svg') 0 0 / 35px no-repeat;
+        &:before {
+            content: 'loading . . .';
+            position: absolute;
+            color: $a11y_gray;
+            left: 0;
+        }
+    }
     &:before {
         content: 'sorted newest to oldest';
         font-size: 0.8em;
@@ -233,6 +235,17 @@
         right: 0;
         background-color: #fff;
 
+    }
+}
+.search-div {
+    position: relative;
+}
+.no-results-message {
+    position: absolute;
+    z-index: 10;
+    color: $red;
+    &.search-box {
+        top: 23px;
     }
 }
 .results ul {

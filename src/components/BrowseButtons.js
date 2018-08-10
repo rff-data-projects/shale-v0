@@ -54,13 +54,16 @@ export const createBrowseCategory = function(category, index, isCategorized){
     var browseButton = parent.children[0]; 
 
     browseButton.onclick = function(){
-      console.log(this);
-      d3.selectAll('.browse-buttons .button')
-        .classed('active', false);
-      d3.select(this)
-        .classed('active', true);
-      RFFApp.controller.getCollectionItems(collection.data.key);
-      RFFApp.controller.clearSearch();
+      RFFApp.controller.loading(true);
+      setTimeout(() => {
+        d3.selectAll('.browse-buttons .button')
+          .classed('active', false);
+        d3.select(this)
+          .classed('active', true);
+        RFFApp.controller.getCollectionItems(collection.data.key);
+        RFFApp.controller.clearSearch();
+        RFFApp.controller.loading(false);
+      });
     };
     
     return browseButton; 
