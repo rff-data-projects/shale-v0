@@ -19,7 +19,7 @@
 .results {
     padding: 0.25em;
     padding-right:0.5em;
-    border: 1px solid #e6e7e8;
+    
 
 }
 
@@ -58,7 +58,7 @@
             background: #fff;
             transition: transform 0.2s linear;
             transform: translateX(0px);
-            padding: 0.25em;
+            padding: 0.25em 0.25em 1em;
         }
         .detail-results-wrapper {
             overflow: hidden;
@@ -213,7 +213,9 @@
 
 }
 .synthesis-results {
-    position: sticky;
+    @media (min-width: 700px){
+        position: sticky;
+    }
     top:0;
     z-index: 9;
     background-color: #fff;
@@ -259,9 +261,7 @@
 }
 
 .links-div {
-    position: absolute;
-    bottom: .5em;
-    right: .25em;
+   
     a, a:visited, a:active {
         font-size: 12px;
         color: $dark_gray;
@@ -270,7 +270,7 @@
         border: 1px solid $a11y_gray;
         text-decoration: none;
         border-radius: 3px;
-        margin-left: .9375em;
+        margin-right: .9375em;
         opacity: 0.7;
         transition: opacity 0.2s linear, border-color 0.2s linear, color 0.2s linear, background-color 0.2s linear;
         //font-weight: bold;

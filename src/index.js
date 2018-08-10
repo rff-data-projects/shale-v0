@@ -9,6 +9,7 @@ import loadingPage from 'html-loader!./components/loading-page.html';
 import sharkImageUrl from './assets/shark-animate-sheared.svg';
 import { arrayFind } from './polyfills.js';
 import { NodeListForEach } from './polyfills.js';
+import scrollMonitor from 'scrollmonitor';
 
    
 (function(){     
@@ -168,7 +169,7 @@ import { NodeListForEach } from './polyfills.js';
                     msgTimer = setTimeout(() => {
                         controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
                     },5000);
-                    d3.json('https://api.zotero.org/groups/' + groupId + '/collections?limit=100', (error,data) => {
+                    d3.json('https://api.zotero.org/groups/' + groupId + '/collections?v=3&limit=100', (error,data) => {
                         console.log(data);
                         if (error) {
                             if ( attempt < 3 ){
@@ -247,7 +248,7 @@ import { NodeListForEach } from './polyfills.js';
                         msgTimer = setTimeout(() => {
                             controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
                         },5000);
-                        d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
+                        d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?v=3&include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
                             if (error) {
                                 if ( attempt < 3 ){
                                     console.log('Error, attempt ' + attempt + ': ', error);
@@ -571,8 +572,20 @@ import { NodeListForEach } from './polyfills.js';
             controller.fadeInText(document.querySelector('#loading-status'),'Almost ready')
             this.setupSidebar();
             this.removeSplash();
+            this.setScrollMonitor();
             controller.loading(false);
            
+        },
+        setScrollMonitor(){
+            var el = document.querySelector('#browse-buttons-container');
+            var watcher = scrollMonitor.create( el, 200);
+            var btn = document.querySelector('button.back-to-top');
+            watcher.exitViewport(function(){
+                btn.classList.add('show');
+            });
+            watcher.enterViewport(function(){
+                btn.classList.remove('show');
+            });
         },
         removeSplash(){
 
@@ -598,6 +611,7 @@ import { NodeListForEach } from './polyfills.js';
             });
         },
         setupSidebar(){
+
           
             var months = {
                 '0': 'January',
@@ -616,6 +630,8 @@ import { NodeListForEach } from './polyfills.js';
             var lastModifiedDate = d3.max(model.zoteroItems, d => new Date(d.data.dateModified));
             var version = d3.max(model.zoteroItems, d => d.data.version);
             var sidebar = document.querySelector('#sidebar');
+            this.controlToggleButton(sidebar);
+            this.controlBackToTop();
             var html = `
             <p>Date last modified: ${lastModifiedDate.getDate()} ${months[lastModifiedDate.getMonth()]} ${lastModifiedDate.getFullYear()}<br />(Version ${version})</p>
             `;
@@ -627,6 +643,26 @@ import { NodeListForEach } from './polyfills.js';
             this.sidebarContact();   
             this.sibebarDocumentation();     
 
+        },
+        controlToggleButton(sidebar){
+            var button = document.querySelector('button.toggle-sidebar');
+            button.onclick = () => {
+                console.log('click');
+                this.toggleSidebar(sidebar, button);
+            };
+        },
+        controlBackToTop(){
+            var button = document.querySelector('button.back-to-top');
+            button.onclick = () => {
+                window.scroll({ top: 0, left: 0, behavior: 'smooth' });
+            };
+        },
+        toggleSidebar(sidebar, button){
+            console.log('click');
+            sidebar.classList.toggle('show');
+            button.innerHTML = button.innerHTML === 'more' ? 'close' : 'more';
+            document.querySelector('body').classList.toggle('scroll-lock');
+            document.querySelector('html').classList.toggle('scroll-lock');
         },
         addSearch(){
             document.querySelector('#sidebar').insertAdjacentHTML('beforeend', searchHTML);
@@ -676,13 +712,11 @@ import { NodeListForEach } from './polyfills.js';
             div.className = 'contact-us';
           div.innerHTML = `
             <h3>Get in touch</h3>
-              <form><!--<form method="POST" action="http://formspree.io/XXXXXXX" _lpchecked="1">-->
-              <input type="email" name="email" placeholder="Your email">
-              <textarea name="message" placeholder="Your message"></textarea>
-                <input type="text" name="_gotcha" style="display:none">
-                <input type="hidden" name="_next" value="/projects/?thanks">
-              <button type="submit">Send</button>
-            </form>
+              <form method="POST" action="https://formspree.io/sharc@rff.org">
+                  <input type="email" name="email" placeholder="Your email">
+                  <textarea name="message" placeholder="Your message"></textarea>
+                  <button type="submit">Send</button>
+                </form>
           `;  
           document.querySelector('#sidebar').appendChild(div);
         },
