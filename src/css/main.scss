@@ -54,7 +54,9 @@ h1, h2, h3, h4, h5, h6 {
   color: $dark_gray;
   overflow: hidden;
 }
-
+.tippy-popper {
+  max-width: 320px !important;
+}
 #search-type {
     label {
         display: inline;
@@ -145,7 +147,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 100vh;
   will-change: scroll-position;
   background-color: #fff;
-  transition: transform 0.75s linear;
+  transition: transform 0.25s linear;
   transform: translate(0,0);
   z-index: 9;
   .loading & {
@@ -153,6 +155,9 @@ h1, h2, h3, h4, h5, h6 {
   }
   .contact-us textarea {
     overflow: visible;
+  }
+  svg {
+    max-width: 400px;
   }
 }
 
@@ -251,17 +256,19 @@ p { max-width: 850px;}
 
 
 @media (max-width: 699px) {
-  .l-1up {
+  #app-container > div:not(#loading-splash) {
     padding: 0;
   }
   .category-group {
     padding: 10px 0;
   }
   #sidebar {
+    will-change: transform;
     position: fixed;
     left:0;
     top:0;
     transform: translate(100%, 0);
+    padding: 0 10px !important;
     &.show {
       transform: translate(0, 0);
     }
