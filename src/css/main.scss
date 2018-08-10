@@ -305,8 +305,7 @@ button.toggle-sidebar {
     bottom: 0;
     right: 0;
     z-index: 10;
-    transform: rotate(-90deg) translate(100%,0);
-    transform-origin: bottom right;
+    
     .sharc-loaded & {
       display: block;
       @media (min-width: 700px) {
