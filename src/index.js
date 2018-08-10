@@ -168,7 +168,7 @@ import { NodeListForEach } from './polyfills.js';
                     msgTimer = setTimeout(() => {
                         controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
                     },5000);
-                    d3.json('https://api.zotero.org/groups/' + groupId + '/collections?limit=100', (error,data) => {
+                    d3.json('https://api.zotero.org/groups/' + groupId + '/collections?v=3&limit=100', (error,data) => {
                         console.log(data);
                         if (error) {
                             if ( attempt < 3 ){
@@ -247,7 +247,7 @@ import { NodeListForEach } from './polyfills.js';
                         msgTimer = setTimeout(() => {
                             controller.fadeInText(document.querySelector('#loading-status'),'Zotero is taking a while. Please be patient.')
                         },5000);
-                        d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
+                        d3.request('https://api.zotero.org/groups/' + groupId + '/items/top?v=3&include=data,bib&limit=100&start=' + ( i * 100 ), (error,xhr) => { 
                             if (error) {
                                 if ( attempt < 3 ){
                                     console.log('Error, attempt ' + attempt + ': ', error);
