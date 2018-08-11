@@ -273,7 +273,6 @@
         margin-right: .9375em;
         opacity: 0.7;
         transition: opacity 0.2s linear, border-color 0.2s linear, color 0.2s linear, background-color 0.2s linear;
-        //font-weight: bold;
         .list-item:hover & {
             opacity: 1;
             &.details-link {
@@ -299,5 +298,6 @@
         position: absolute;
         opacity:0;
         z-index:-1;
+        left: 0;
     }
 }
