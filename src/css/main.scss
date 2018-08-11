@@ -302,11 +302,12 @@ button.toggle-sidebar {
     display:none;
     will-change: scroll-position;
     position: fixed;
-    bottom: 0;
-    right: 0;
+    bottom: -4px;
+    right: -2px;
     z-index: 10;
     transform: rotate(-90deg) translate(100%,0);
     transform-origin: bottom right;
+    border: 1px solid $blue;
     .sharc-loaded & {
       display: block;
       @media (min-width: 700px) {
