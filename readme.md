@@ -12,6 +12,8 @@ SHARC is written in framework-less ES6 JavaScript compiled and transpiled throug
 
 Some of the code is fully modularized, with the HTML, JS, and SCSS of the components housed in separate folders and `import`ed into index.js. Some of it is handled directly in index.js, and a variety of methods for creating views and manipulating them is used. Porting an earlier version from a Grunt-based workflow to Webpack accounts for some of the inconsistencies.
 
+So that the authors can easily edit the text in the tooltips, that information is housed in a [Google Sheets document](https://docs.google.com/spreadsheets/d/1kK8LHgzaSt0zC1J8j3THq8Hgu_kEF-TGLry_U-6u9WA/edit#gid=0) that's ingested via API.
+
 ## To edit
 
 1. [Install npm](https://www.npmjs.com/get-npm)
